@@ -4,7 +4,7 @@ import os
 import seaborn as sns
 sns.set()
 
-T_final = 7 #
+T_final = 12 #
 h_t = 0.01
 
 L = 100  # 
@@ -25,8 +25,8 @@ mac_atual = np.zeros((int(L/h_x), int(L/h_x)))
 
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
-        if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 20:
-            mac_atual[i][j] = 1
+        if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 5:
+            mac_atual[i][j] = 0.5
 
 # mac_atual[int(0.45*L/h_x):int(0.55*L/h_x)+1, int(0.45*L/h_x):int(0.55*L/h_x)+1] = 1
 mac_anterior = np.copy(mac_atual)
