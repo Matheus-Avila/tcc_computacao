@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import seaborn as sns
+import chaospy as cp
+import math
 sns.set()
 
 T_final = 12 #
@@ -21,14 +23,22 @@ r = 6 # [1, 6]
 # IC
 # Macrofagos
 mac_atual = np.zeros((int(L/h_x), int(L/h_x)))
-
-
+# s = np.random.normal(0,1,(int(L/h_x), int(L/h_x)))
+# x, y = np.random.multivariate_normal(0, 1, 5000).T
+# plt.plot(x, y, 'x')
+# plt.axis('equal')
+# plt.show()
+# distribution = cp.Normal(0,1)
+# uloc = np.linspace(0, 1, int(L/h_x))
+# xloc = distribution.inv(uloc)
+# s = distribution.pdf(xloc).round(1)
+#print(s)
+# print(xloc.round(int(L/(h_x*2))))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 5:
-            mac_atual[i][j] = 0.5
+            mac_atual[i][j] = 0.5 # 0.1*math.exp(-1*( (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2)/s[i,j])
 
-# mac_atual[int(0.45*L/h_x):int(0.55*L/h_x)+1, int(0.45*L/h_x):int(0.55*L/h_x)+1] = 1
 mac_anterior = np.copy(mac_atual)
 # Citocinas pro-inflamatorias
 cit_atual = np.zeros((int(L/h_x), int(L/h_x)))
