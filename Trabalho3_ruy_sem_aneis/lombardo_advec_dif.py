@@ -20,6 +20,13 @@ beta = 1  # [0.2, 1]
 delta = 1  # [0, 1]
 r = 6 # [1, 6]
 
+d_dc = 1 # difusao DC convencional(procurar na literatura)
+d_da = 1 # difusao DC ativada(procurar na literatura)
+b_d = 1 # taxa de ativacao de dc por microglia(procurar na literatura)
+r_dc = 1 # agressividade de dc convencional(procurar na literatura)
+r_da = 9 # agressividade de dc ativada(procurar na literatura)
+
+
 # IC
 # Macrofagos
 mac_atual = np.zeros((int(L/h_x), int(L/h_x)))
@@ -38,6 +45,14 @@ for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 5:
             mac_atual[i][j] = 0.5 # 0.1*math.exp(-1*( (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2)/s[i,j])
+
+# Dendríticas convencionais
+dendritica_conv_atual = np.ones((int(L/h_x), int(L/h_x)))
+dendritica_conv_anterior = np.ones((int(L/h_x), int(L/h_x)))
+
+# Dendríticas ativadas
+dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
+dendritica_ativ_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 mac_anterior = np.copy(mac_atual)
 # Citocinas pro-inflamatorias
@@ -74,11 +89,25 @@ for k in range(steps):
             d = olide_anterior[i][j]
             c = cit_anterior[i][j]
             m = mac_anterior[i][j]
+            dc = dendritica_conv_anterior[i][j]
+            da = dendritica_ativ_anterior[i][j]
             # condição de contorno de Neumman macrofagos
             mac_ipj = mac_anterior[i+1][j] if i != tam-1 else m - 2*h_x*u_c
             mac_imj = mac_anterior[i-1][j] if i != 0 else m - 2*h_x*u_b
             mac_ijp = mac_anterior[i][j+1] if j != tam-1 else m - 2*h_x*u_c
             mac_ijm = mac_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
+
+            # condição de contorno de Neumman dc convencional
+            dc_ipj = dendritica_conv_anterior[i+1][j] if i != tam-1 else m - 2*h_x*u_c
+            dc_imj = dendritica_conv_anterior[i-1][j] if i != 0 else m - 2*h_x*u_b
+            dc_ijp = dendritica_conv_anterior[i][j+1] if j != tam-1 else m - 2*h_x*u_c
+            dc_ijm = dendritica_conv_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
+
+            # condição de contorno de Neumman de ativadas
+            da_ipj = dendritica_ativ_anterior[i+1][j] if i != tam-1 else m - 2*h_x*u_c
+            da_imj = dendritica_ativ_anterior[i-1][j] if i != 0 else m - 2*h_x*u_b
+            da_ijp = dendritica_ativ_anterior[i][j+1] if j != tam-1 else m - 2*h_x*u_c
+            da_ijm = dendritica_ativ_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
             
             # condição de contorno de Neumman oligodendrocitos destruidos
             olide_ipj = olide_anterior[i+1][j] if i != tam-1 else d - 2*h_x*u_c
@@ -102,28 +131,39 @@ for k in range(steps):
             gradiente_c_j = (cit_ijp - cit_ijm)/(2*h_x)
 
             if gradiente_c_i > 0:
-                up_wind_i = (m/(1 + m) - \
-                mac_imj/(1 + mac_imj))/h_x
-                gradiente_m_i = up_wind_i
+                gradiente_m_i = (m/(1 + m) - mac_imj/(1 + mac_imj))/h_x
+                gradiente_dc_i = (dc/(1+dc) -dc_imj/(1+dc_imj))/h_x
+                gradiente_da_i = (da/(1+da) -da_imj/(1+da_imj))/h_x
             else:
-                down_wind_i = (mac_ipj/(1 + mac_ipj) - \
-                m/(1 + m))/h_x
-                gradiente_m_i = down_wind_i
+                gradiente_m_i = (mac_ipj/(1 + mac_ipj) - m/(1 + m))/h_x
+                gradiente_dc_i = (dc_ipj/(1 + dc_ipj) - dc/(1 + dc))/h_x
+                gradiente_da_i = (da_ipj/(1 + da_ipj) - da/(1 + da))/h_x
             if gradiente_c_j > 0:
-                up_wind_j = (m/(1 + m) - \
-                mac_ijm/(1 + mac_ijm))/h_x
-                gradiente_m_j = up_wind_j
+                gradiente_m_j = (m/(1 + m) - mac_ijm/(1 + mac_ijm))/h_x
+                gradiente_dc_j = (dc/(1 + dc) - dc_ijm/(1 + dc_ijm))/h_x
+                gradiente_da_j = (da/(1 + da) - da_ijm/(1 + da_ijm))/h_x
             else:
-                down_wind_j = (mac_ijp/(1 + mac_ijp) - \
-                m/(1 + m))/h_x
-                gradiente_m_j = down_wind_j
-            
+                gradiente_m_j = (mac_ijp/(1 + mac_ijp) - m/(1 + m))/h_x
+                gradiente_dc_j = (dc_ijp/(1 + dc_ijp) - dc/(1 + dc))/h_x
+                gradiente_da_j = (da_ijp/(1 + da_ijp) - da/(1 + da))/h_x
 
             quimiotaxia_mac = chi*(gradiente_c_i*gradiente_m_i + gradiente_c_j*gradiente_m_j)
             difusao_mac = (mac_ipj + mac_imj - 4*m + mac_ijp + mac_ijm )/h_x**2
             reacao_mac = m*(1 - m)
             
             mac_atual[i][j] = m + h_t*(difusao_mac + reacao_mac - quimiotaxia_mac)
+            
+            #DC convencional
+            quimiotaxia_dc = chi*(gradiente_c_i*gradiente_dc_i + gradiente_c_j*gradiente_dc_j)
+            difusao_dc = d_dc*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
+
+            dendritica_conv_atual[i][j] = dc + h_t*(difusao_dc - quimiotaxia_dc - b_d*m*dc)
+
+            #DC ativada
+            quimiotaxia_da = chi*(gradiente_c_i*gradiente_da_i + gradiente_c_j*gradiente_da_j)
+            difusao_da = d_da(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
+
+            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da - quimiotaxia_da + b_d*m*dc)
 
             #Dados da equacao citocinas
             difusao_cit = epsilon*(cit_ipj + cit_imj - 4*c + cit_ijp + cit_ijm )/h_x**2
@@ -132,7 +172,7 @@ for k in range(steps):
             cit_atual[i][j] = c + h_t*(difusao_cit + reacao_cit)/tau
 
             #Dados da equacao oligodendrocitos destruidos
-            olide_atual[i][j] = d + h_t*r*(m/(1 + m))*m*(1 - d)
+            olide_atual[i][j] = d + h_t*(r*(m/(1 + m))*m*(1 - d) + r_dc*(dc/(1 + dc))*dc*(1 - d) + r_da*(da/(1 + da))*da*(1 - d) )
             
 
     mac_anterior = np.copy(mac_atual)
