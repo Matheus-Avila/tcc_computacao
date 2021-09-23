@@ -6,7 +6,7 @@ import chaospy as cp
 import math
 sns.set()
 
-T_final = 12 #
+T_final = 7 #
 h_t = 0.01
 
 L = 100  # 
@@ -81,8 +81,6 @@ sol_tempo_d.append(olide_anterior)
 sol_tempo_m = []
 sol_tempo_m.append(mac_anterior)
 
-#Funcoes para escolha de Chi(m)
-
 for k in range(steps):
     for i in range(tam):
         for j in range(tam):
@@ -98,16 +96,16 @@ for k in range(steps):
             mac_ijm = mac_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
 
             # condição de contorno de Neumman dc convencional
-            dc_ipj = dendritica_conv_anterior[i+1][j] if i != tam-1 else m - 2*h_x*u_c
-            dc_imj = dendritica_conv_anterior[i-1][j] if i != 0 else m - 2*h_x*u_b
-            dc_ijp = dendritica_conv_anterior[i][j+1] if j != tam-1 else m - 2*h_x*u_c
-            dc_ijm = dendritica_conv_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
+            dc_ipj = dendritica_conv_anterior[i+1][j] if i != tam-1 else dc - 2*h_x*u_c
+            dc_imj = dendritica_conv_anterior[i-1][j] if i != 0 else dc - 2*h_x*u_b
+            dc_ijp = dendritica_conv_anterior[i][j+1] if j != tam-1 else dc - 2*h_x*u_c
+            dc_ijm = dendritica_conv_anterior[i][j-1] if j != 0 else dc - 2*h_x*u_d
 
             # condição de contorno de Neumman de ativadas
-            da_ipj = dendritica_ativ_anterior[i+1][j] if i != tam-1 else m - 2*h_x*u_c
-            da_imj = dendritica_ativ_anterior[i-1][j] if i != 0 else m - 2*h_x*u_b
-            da_ijp = dendritica_ativ_anterior[i][j+1] if j != tam-1 else m - 2*h_x*u_c
-            da_ijm = dendritica_ativ_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
+            da_ipj = dendritica_ativ_anterior[i+1][j] if i != tam-1 else da - 2*h_x*u_c
+            da_imj = dendritica_ativ_anterior[i-1][j] if i != 0 else da - 2*h_x*u_b
+            da_ijp = dendritica_ativ_anterior[i][j+1] if j != tam-1 else da - 2*h_x*u_c
+            da_ijm = dendritica_ativ_anterior[i][j-1] if j != 0 else da - 2*h_x*u_d
             
             # condição de contorno de Neumman oligodendrocitos destruidos
             olide_ipj = olide_anterior[i+1][j] if i != tam-1 else d - 2*h_x*u_c
@@ -161,7 +159,7 @@ for k in range(steps):
 
             #DC ativada
             quimiotaxia_da = chi*(gradiente_c_i*gradiente_da_i + gradiente_c_j*gradiente_da_j)
-            difusao_da = d_da(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
+            difusao_da = d_da*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
 
             dendritica_ativ_atual[i][j] = da + h_t*(difusao_da - quimiotaxia_da + b_d*m*dc)
 
@@ -178,12 +176,49 @@ for k in range(steps):
     mac_anterior = np.copy(mac_atual)
     cit_anterior = np.copy(cit_atual)
     olide_anterior = np.copy(olide_atual)
+    dendritica_conv_anterior = np.copy(dendritica_conv_atual)
+    dendritica_ativ_anterior = np.copy(dendritica_ativ_atual)
+
     if k%p ==0 or k == steps-1:
             x_pts, y_pts = np.meshgrid(x, x)
+            
+            #results odc
             cp = plt.contourf(x_pts, y_pts,olide_anterior, 100)
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Ols-destruidos')
             plt.contourf(x_pts, y_pts, olide_anterior,100)
-            plt.savefig('figs/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('figs/ols/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.clf()
+            
+            #results macrofagos
+            cp = plt.contourf(x_pts, y_pts,mac_anterior, 100)
+            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
+            plt.colorbar(cp, label='Macrófagos')
+            plt.contourf(x_pts, y_pts, mac_anterior,100)
+            plt.savefig('figs/mac/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.clf()
+            
+            #results dc convencional
+            cp = plt.contourf(x_pts, y_pts,dendritica_conv_anterior, 100)
+            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
+            plt.colorbar(cp, label='DC- convencional')
+            plt.contourf(x_pts, y_pts, dendritica_conv_anterior,100)
+            plt.savefig('figs/dc/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.clf()
+
+            #results dc ativada
+            cp = plt.contourf(x_pts, y_pts,dendritica_ativ_anterior, 100)
+            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
+            plt.colorbar(cp, label='DC- ativada')
+            plt.contourf(x_pts, y_pts, dendritica_ativ_anterior,100)
+            plt.savefig('figs/da/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.clf()
+
+            #results citocina
+            cp = plt.contourf(x_pts, y_pts,cit_anterior, 100)
+            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
+            plt.colorbar(cp, label='Citocina')
+            plt.contourf(x_pts, y_pts, cit_anterior,100)
+            plt.savefig('figs/cit/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
     print('tempo: '+str(k*h_t))
