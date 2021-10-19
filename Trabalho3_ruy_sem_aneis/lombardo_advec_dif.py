@@ -22,9 +22,15 @@ r = 6 # [1, 6]
 
 d_dc = 1 # difusao DC convencional(procurar na literatura)
 d_da = 1 # difusao DC ativada(procurar na literatura)
-b_d = 1 # taxa de ativacao de dc por microglia(procurar na literatura)
+d_t_cit = 1 # difusao t citotóxica(procurar na literatura)
+d_anti = 1 # difusao anticorpo(procurar na literatura)
+lamb_f_dc = 0.3 # taxa de anticorpos consumidos durante o processo de opsonização por DC convencional
+lamb_f_da = 0.3 # taxa de anticorpos consumidos durante o processo de opsonização por DC ativada
+lamb_f_m = 0.3 # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
+b_d = 1 # taxa de ativacao de dc por odc(procurar na literatura)
 r_dc = 1 # agressividade de dc convencional(procurar na literatura)
 r_da = 9 # agressividade de dc ativada(procurar na literatura)
+r_t = 1  # agressividade de t citotoxica(procurar na literatura)
 
 
 # IC
@@ -54,13 +60,24 @@ dendritica_conv_anterior = np.ones((int(L/h_x), int(L/h_x)))
 dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
 dendritica_ativ_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
+# Macrofagos
 mac_anterior = np.copy(mac_atual)
+
 # Citocinas pro-inflamatorias
 cit_atual = np.zeros((int(L/h_x), int(L/h_x)))
 cit_anterior = np.zeros((int(L/h_x), int(L/h_x)))
+
 # Ol destruidos
 olide_atual = np.zeros((int(L/h_x), int(L/h_x)))
 olide_anterior = np.zeros((int(L/h_x), int(L/h_x)))
+
+# T citotóxica
+t_cito_atual = 0.1*np.ones((int(L/h_x), int(L/h_x)))
+t_cito_anterior = 0.1*np.ones((int(L/h_x), int(L/h_x)))
+
+# anticorpo
+anticorpo_atual = 0.1*np.zeros((int(L/h_x), int(L/h_x)))
+anticorpo_anterior = 0.1*np.zeros((int(L/h_x), int(L/h_x)))
 
 #BC
 u_a = 0#Neumann cima
@@ -89,6 +106,9 @@ for k in range(steps):
             m = mac_anterior[i][j]
             dc = dendritica_conv_anterior[i][j]
             da = dendritica_ativ_anterior[i][j]
+            f = anticorpo_anterior[i][j]
+            t_cito = t_cito_anterior[i][j]
+
             # condição de contorno de Neumman macrofagos
             mac_ipj = mac_anterior[i+1][j] if i != tam-1 else m - 2*h_x*u_c
             mac_imj = mac_anterior[i-1][j] if i != 0 else m - 2*h_x*u_b
@@ -119,9 +139,21 @@ for k in range(steps):
             cit_ijp = cit_anterior[i][j+1] if j != tam-1 else c - 2*h_x*u_c
             cit_ijm = cit_anterior[i][j-1] if j != 0 else c - 2*h_x*u_d
             
+            # condição de contorno de Neumman t citotóxicas
+            t_cito_ipj = t_cito_anterior[i+1][j] if i != tam-1 else t_cito - 2*h_x*u_c
+            t_cito_imj = t_cito_anterior[i-1][j] if i != 0 else t_cito - 2*h_x*u_b
+            t_cito_ijp = t_cito_anterior[i][j+1] if j != tam-1 else t_cito - 2*h_x*u_c
+            t_cito_ijm = t_cito_anterior[i][j-1] if j != 0 else t_cito - 2*h_x*u_d
+
+            # condição de contorno de Neumman anticorpos
+            f_ipj = anticorpo_anterior[i+1][j] if i != tam-1 else f - 2*h_x*u_c
+            f_imj = anticorpo_anterior[i-1][j] if i != 0 else f - 2*h_x*u_b
+            f_ijp = anticorpo_anterior[i][j+1] if j != tam-1 else f - 2*h_x*u_c
+            f_ijm = anticorpo_anterior[i][j-1] if j != 0 else f - 2*h_x*u_d
+            
             #Dados da equacao macrofagos
 
-            #Dependendo do quadrante vou fazer upwind ou downwind no eixo i ou eixo j
+            #Dependendo do gradiente das citocinas vou fazer upwind ou downwind no eixo i ou eixo j
 
             #Decidindo qual combinacao usar no gradiente dos macrofagos
             
@@ -132,18 +164,22 @@ for k in range(steps):
                 gradiente_m_i = (m/(1 + m) - mac_imj/(1 + mac_imj))/h_x
                 gradiente_dc_i = (dc/(1+dc) -dc_imj/(1+dc_imj))/h_x
                 gradiente_da_i = (da/(1+da) -da_imj/(1+da_imj))/h_x
+                gradiente_t_i = (t_cito/(1+t_cito) -t_cito_imj/(1+t_cito_imj))/h_x
             else:
                 gradiente_m_i = (mac_ipj/(1 + mac_ipj) - m/(1 + m))/h_x
                 gradiente_dc_i = (dc_ipj/(1 + dc_ipj) - dc/(1 + dc))/h_x
                 gradiente_da_i = (da_ipj/(1 + da_ipj) - da/(1 + da))/h_x
+                gradiente_t_i = (t_cito_ipj/(1 + t_cito_ipj) - t_cito/(1 + t_cito))/h_x
             if gradiente_c_j > 0:
                 gradiente_m_j = (m/(1 + m) - mac_ijm/(1 + mac_ijm))/h_x
                 gradiente_dc_j = (dc/(1 + dc) - dc_ijm/(1 + dc_ijm))/h_x
                 gradiente_da_j = (da/(1 + da) - da_ijm/(1 + da_ijm))/h_x
+                gradiente_t_j = (t_cito/(1 + t_cito) - t_cito_ijm/(1 + t_cito_ijm))/h_x
             else:
                 gradiente_m_j = (mac_ijp/(1 + mac_ijp) - m/(1 + m))/h_x
                 gradiente_dc_j = (dc_ijp/(1 + dc_ijp) - dc/(1 + dc))/h_x
                 gradiente_da_j = (da_ijp/(1 + da_ijp) - da/(1 + da))/h_x
+                gradiente_t_j = (t_cito_ijp/(1 + t_cito_ijp) - t_cito/(1 + t_cito))/h_x
 
             quimiotaxia_mac = chi*(gradiente_c_i*gradiente_m_i + gradiente_c_j*gradiente_m_j)
             difusao_mac = (mac_ipj + mac_imj - 4*m + mac_ijp + mac_ijm )/h_x**2
@@ -155,13 +191,22 @@ for k in range(steps):
             quimiotaxia_dc = chi*(gradiente_c_i*gradiente_dc_i + gradiente_c_j*gradiente_dc_j)
             difusao_dc = d_dc*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
 
-            dendritica_conv_atual[i][j] = dc + h_t*(difusao_dc - quimiotaxia_dc - b_d*m*dc)
+            dendritica_conv_atual[i][j] = dc + h_t*(difusao_dc - quimiotaxia_dc - b_d*(1-d)*dc)
 
             #DC ativada
             quimiotaxia_da = chi*(gradiente_c_i*gradiente_da_i + gradiente_c_j*gradiente_da_j)
             difusao_da = d_da*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
 
-            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da - quimiotaxia_da + b_d*m*dc)
+            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da - quimiotaxia_da + b_d*(1-d)*dc)
+
+            #T citotóxica
+            quimiotaxia_t_cito = chi*(gradiente_c_i*gradiente_t_i + gradiente_c_j*gradiente_t_j)
+            difusao_t_cito = d_t_cit*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
+            t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito) #termo de migração faltando!!
+
+            # anticorpo
+            difusao_anticorpo = d_anti*(f_ipj + f_imj - 4*f + f_ijp + f_ijm)
+            anticorpo_atual[i][j] = f + h_t*(difusao_anticorpo - lamb_f_da*f*dc - lamb_f_da*f*da - lamb_f_m*f*m)#termo de migração faltando!!
 
             #Dados da equacao citocinas
             difusao_cit = epsilon*(cit_ipj + cit_imj - 4*c + cit_ijp + cit_ijm )/h_x**2
@@ -170,7 +215,7 @@ for k in range(steps):
             cit_atual[i][j] = c + h_t*(difusao_cit + reacao_cit)/tau
 
             #Dados da equacao oligodendrocitos destruidos
-            olide_atual[i][j] = d + h_t*(r*(m/(1 + m))*m*(1 - d) + r_dc*(dc/(1 + dc))*dc*(1 - d) + r_da*(da/(1 + da))*da*(1 - d) )
+            olide_atual[i][j] = d + h_t*(r*(m/(1 + m))*m*(1 - d) + r_dc*(dc/(1 + dc))*dc*(1 - d) + r_da*(da/(1 + da))*da*(1 - d) + r_t*(t_cito/(1 + t_cito))*t_cito*(1 - d))
             
 
     mac_anterior = np.copy(mac_atual)
@@ -178,6 +223,8 @@ for k in range(steps):
     olide_anterior = np.copy(olide_atual)
     dendritica_conv_anterior = np.copy(dendritica_conv_atual)
     dendritica_ativ_anterior = np.copy(dendritica_ativ_atual)
+    t_cito_anterior = np.copy(t_cito_atual)
+    anticorpo_anterior = np.copy(anticorpo_atual)
 
     if k%p ==0 or k == steps-1:
             x_pts, y_pts = np.meshgrid(x, x)
