@@ -232,9 +232,9 @@ for k in range(steps):
             #results odc
             cp = plt.contourf(x_pts, y_pts,olide_anterior, 100)
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='Ols-destruidos')
+            plt.colorbar(cp, label='ODC-destruidos')
             plt.contourf(x_pts, y_pts, olide_anterior,100)
-            plt.savefig('../results/ols/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/oligodendrocitos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             
             #results macrofagos
@@ -242,7 +242,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Macrófagos')
             plt.contourf(x_pts, y_pts, mac_anterior,100)
-            plt.savefig('../results/mac/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/macrofagos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             
             #results dc convencional
@@ -250,7 +250,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='DC- convencional')
             plt.contourf(x_pts, y_pts, dendritica_conv_anterior,100)
-            plt.savefig('../results/dc/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/dendriticas_convencionais/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results dc ativada
@@ -258,7 +258,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='DC- ativada')
             plt.contourf(x_pts, y_pts, dendritica_ativ_anterior,100)
-            plt.savefig('../results/da/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/dendriticas_ativadas/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results citocina
@@ -266,7 +266,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Citocina')
             plt.contourf(x_pts, y_pts, cit_anterior,100)
-            plt.savefig('../results/cit/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/citocinas/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results T citotóxica
@@ -274,7 +274,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='T citotóxica')
             plt.contourf(x_pts, y_pts, t_cito_anterior,100)
-            plt.savefig('../results/tcit/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/t_citotoxica/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results Anticorpo
@@ -282,6 +282,6 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Anticorpo')
             plt.contourf(x_pts, y_pts, anticorpo_anterior,100)
-            plt.savefig('../results/ant/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results/anticorpos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
     print('tempo: '+str(k*h_t))
