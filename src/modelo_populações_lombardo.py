@@ -4,25 +4,38 @@ import os
 import seaborn as sns
 sns.set()
 
-T_final = 7 #
-h_t = 0.01
+T_final = 1*60*24 #
+h_t = 0.0001
 
-L = 100  # 
-h_x = 1
+L = 25.8  # 
+# L = 100
+h_x = 0.01
 
 # Parametros
+# chi = 15  # [4, 55]
+# D_mac = 1
+# lambda_mac = 1
+# tau = 1  # [0.001, 1]
+# epsilon = 0.5  # [0.5, 1.5]
+# b = 0.2  # [0.2, 1] beta
+# mu = 1  # [0, 1] delta
+# kappa = 6 # [1, 6] r
+# alpha = 1
+# mac_media = 1
+# odc_media = 1
+
 chi = 0.298  # [4, 55]
-D_mac = 6.6*10**-5
-lambda_mac = 3*10**-6
+D_mac = 6.6*10**-5 # nao tem. vale um
+lambda_mac = 3*10**-6 # nao tem. vale um
 tau = 1  # [0.001, 1]
 epsilon = 9*10**-4  # [0.5, 1.5]
-beta = 1.96*10*-5  # [0.2, 1]
-delta = 10**-5  # [0, 1]
-r = 3.96*10**-6 # [1, 6]
-alpha = 0.03
+b = 1.96*10**-5  # [0.2, 1] beta
+mu = 10**-5  # [0, 1] delta
+kappa = 3.96*10**-6 # [1, 6] r
+alpha = 0.03 # nao tem. vale um
+
 mac_media = 350
 odc_media = 400
-
 # IC
 # Macrofagos
 mac_atual = np.zeros((int(L/h_x), int(L/h_x)))
@@ -31,7 +44,7 @@ mac_atual = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 20:
-            mac_atual[i][j] = 100
+            mac_atual[i][j] = mac_media/3.0
 
 # mac_atual[int(0.45*L/h_x):int(0.55*L/h_x)+1, int(0.45*L/h_x):int(0.55*L/h_x)+1] = 1
 mac_anterior = np.copy(mac_atual)
@@ -54,7 +67,7 @@ x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
-p = int(steps/100)
+p = int(steps/10000)
 
 sol_tempo_d = []
 sol_tempo_d.append(olide_anterior)
@@ -97,21 +110,17 @@ for k in range(steps):
             gradiente_c_j = (cit_ijp - cit_ijm)/(2*h_x)
 
             if gradiente_c_i > 0:
-                up_wind_i = (m/(mac_media + m) - \
+                gradiente_m_i = (m/(mac_media + m) - \
                 mac_imj/(mac_media + mac_imj))/h_x
-                gradiente_m_i = up_wind_i
             else:
-                down_wind_i = (mac_ipj/(mac_media + mac_ipj) - \
+                gradiente_m_i = (mac_ipj/(mac_media + mac_ipj) - \
                 m/(mac_media + m))/h_x
-                gradiente_m_i = down_wind_i
             if gradiente_c_j > 0:
-                up_wind_j = (m/(mac_media + m) - \
+                gradiente_m_j = (m/(mac_media + m) - \
                 mac_ijm/(mac_media + mac_ijm))/h_x
-                gradiente_m_j = up_wind_j
             else:
-                down_wind_j = (mac_ijp/(mac_media + mac_ijp) - \
+                gradiente_m_j = (mac_ijp/(mac_media + mac_ijp) - \
                 m/(mac_media + m))/h_x
-                gradiente_m_j = down_wind_j
             
 
             quimiotaxia_mac = chi*(gradiente_c_i*gradiente_m_i + gradiente_c_j*gradiente_m_j)
@@ -122,12 +131,10 @@ for k in range(steps):
 
             #Dados da equacao citocinas
             difusao_cit = epsilon*(cit_ipj + cit_imj - 4*c + cit_ijp + cit_ijm )/h_x**2
-            reacao_cit = delta*d - alpha*c + beta*m
-
+            reacao_cit = mu*d - alpha*c + b*m
             cit_atual[i][j] = c + h_t*(difusao_cit + reacao_cit)/tau
-
             #Dados da equacao oligodendrocitos destruidos
-            olide_atual[i][j] = d + h_t*r*(m/(mac_media + m))*m*(odc_media - d)
+            olide_atual[i][j] = d + h_t*kappa*(m/(mac_media + m))*m*(odc_media - d)
             
 
     mac_anterior = np.copy(mac_atual)
@@ -157,4 +164,4 @@ for k in range(steps):
             plt.contourf(x_pts, y_pts, cit_anterior,100)
             plt.savefig('../results_modelo_populacao/citocina/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
-    print('tempo: '+str(k*h_t))
+            print("Tempo: "+ str(k*h_t))
