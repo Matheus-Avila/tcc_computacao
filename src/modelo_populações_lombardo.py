@@ -5,11 +5,11 @@ import seaborn as sns
 sns.set()
 
 T_final = 1*60*24 #
-h_t = 0.0001
+h_t = 0.001
 
 L = 25.8  # 
 # L = 100
-h_x = 0.01
+h_x = 0.1
 
 # Parametros
 # chi = 15  # [4, 55]
@@ -146,7 +146,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Ols-destruidos')
             plt.contourf(x_pts, y_pts, olide_anterior,100)
-            plt.savefig('../results_modelo_populacao/odc/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/odc/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             x_pts, y_pts = np.meshgrid(x, x)
@@ -154,7 +154,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='microglia')
             plt.contourf(x_pts, y_pts, mac_anterior,100)
-            plt.savefig('../results_modelo_populacao/microglia/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/microglia/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             x_pts, y_pts = np.meshgrid(x, x)
@@ -162,6 +162,6 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='citocinas')
             plt.contourf(x_pts, y_pts, cit_anterior,100)
-            plt.savefig('../results_modelo_populacao/citocina/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/citocina/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             print("Tempo: "+ str(k*h_t))
