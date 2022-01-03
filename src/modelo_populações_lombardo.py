@@ -4,12 +4,12 @@ import os
 import seaborn as sns
 sns.set()
 
-T_final = 1*60*24 #
-h_t = 0.001
+T_final = 1 #
+h_t = 0.0001
 
 L = 25.8  # 
 # L = 100
-h_x = 0.1
+h_x = 0.01
 
 # Parametros
 # chi = 15  # [4, 55]
@@ -24,15 +24,15 @@ h_x = 0.1
 # mac_media = 1
 # odc_media = 1
 
-chi = 0.298  # [4, 55]
-D_mac = 6.6*10**-5 # nao tem. vale um
-lambda_mac = 3*10**-6 # nao tem. vale um
+chi = 0.298*60*24  # [4, 55]
+D_mac = 60*24*6.6*10**-5 # nao tem. vale um
+lambda_mac = 60*24*3*10**-6 # nao tem. vale um
 tau = 1  # [0.001, 1]
-epsilon = 9*10**-4  # [0.5, 1.5]
-b = 1.96*10**-5  # [0.2, 1] beta
-mu = 10**-5  # [0, 1] delta
-kappa = 3.96*10**-6 # [1, 6] r
-alpha = 0.03 # nao tem. vale um
+epsilon = 60*24*9*10**-4  # [0.5, 1.5]
+b = 60*24*1.96*10**-5  # [0.2, 1] beta
+mu = 60*24*10**-5  # [0, 1] delta
+kappa = 60*24*3.96*10**-6 # [1, 6] r
+alpha = 60*24*0.03 # nao tem. vale um
 
 mac_media = 350
 odc_media = 400
