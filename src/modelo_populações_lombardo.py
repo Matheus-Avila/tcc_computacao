@@ -9,7 +9,7 @@ h_t = 0.0001
 
 L = 25.8  # 
 # L = 100
-h_x = 0.01
+h_x = 0.1
 
 # Parametros
 # chi = 15  # [4, 55]
@@ -67,7 +67,7 @@ x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
-p = int(steps/10000)
+p = int(steps/10)
 
 sol_tempo_d = []
 sol_tempo_d.append(olide_anterior)
