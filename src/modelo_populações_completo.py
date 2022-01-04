@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import seaborn as sns
+import time
+
 sns.set()
 
 gradiente = lambda ponto_anterior, ponto_posterior, valor_maximo: quimiotaxia(ponto_posterior, valor_maximo) - quimiotaxia(ponto_anterior, valor_maximo)
@@ -87,7 +89,8 @@ steps = len(t)
 num_figuras = 10
 intervalo_figs = int(steps/num_figuras)
 
-#Funcoes para escolha de Chi(m)
+#Inicio da contagem do tempo
+tic = time.perf_counter()
 
 for k in range(steps):
     for i in range(tam):
@@ -251,3 +254,7 @@ for k in range(steps):
             plt.contourf(x_pts, y_pts, anticorpo_anterior,100)
             plt.savefig('../results/anticorpos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
+
+#Fim da contagem do tempo
+toc = time.perf_counter()
+print(f"Tempo de execução: {toc - tic:0.4f} segundos")
