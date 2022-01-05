@@ -10,7 +10,7 @@ gradiente = lambda ponto_anterior, ponto_posterior, valor_maximo: quimiotaxia(po
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-T_final = 1 # Dia
+T_final = 0.01 # Dia
 h_t = 0.0001
 
 L = 25.8  # 
@@ -177,11 +177,11 @@ for k in range(steps):
             t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
 
             #Oligodendrocitos destruidos 
-            olide_atual[i][j] = oligo_destr + h_t*((r_m + lamb_f_m*anticorpo)*f_func(microlia)*(odc_media - oligo_destr) + r_dc*f_func(dc)*oligo_destr + r_t*f_func(t_cito)*(odc_media - oligo_destr))
+            olide_atual[i][j] = oligo_destr + h_t*((r_m + lamb_f_m*anticorpo)*f_func(microlia, mac_media)*(odc_media - oligo_destr) + r_dc*f_func(dc, dc_media)*oligo_destr + r_t*f_func(t_cito, t_cito_media)*(odc_media - oligo_destr))
 
             #Anticorpo
             difusao_anticorpo = d_anti*(f_ipj + f_imj - 4*anticorpo + f_ijp + f_ijm)
-            reacao_anticorpo = -lamb_f_m*anticorpo*(odc_media - oligo_destr)*f_func(microlia)
+            reacao_anticorpo = -lamb_f_m*anticorpo*(odc_media - oligo_destr)*f_func(microlia, mac_media)
             migracao_anticorpo = gamma_anticorpo*(anticorpo_linfonodo - anticorpo)
             anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo + reacao_anticorpo + migracao_anticorpo)
 
@@ -212,7 +212,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='ODC-destruidos')
             plt.contourf(x_pts, y_pts, olide_anterior,100)
-            plt.savefig('../results/oligodendrocitos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/oligodendrocitos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             
             #results macrofagos
@@ -220,7 +220,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Macrófagos')
             plt.contourf(x_pts, y_pts, mac_anterior,100)
-            plt.savefig('../results/macrofagos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/macrofagos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             
             #results dc convencional
@@ -228,7 +228,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='DC- convencional')
             plt.contourf(x_pts, y_pts, dendritica_conv_anterior,100)
-            plt.savefig('../results/dendriticas_convencionais/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/dendriticas_convencionais/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results dc ativada
@@ -236,7 +236,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='DC- ativada')
             plt.contourf(x_pts, y_pts, dendritica_ativ_anterior,100)
-            plt.savefig('../results/dendriticas_ativadas/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/dendriticas_ativadas/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results T citotóxica
@@ -244,7 +244,7 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='T citotóxica')
             plt.contourf(x_pts, y_pts, t_cito_anterior,100)
-            plt.savefig('../results/t_citotoxica/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/t_citotoxica/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
             #results Anticorpo
@@ -252,8 +252,9 @@ for k in range(steps):
             plt.title("Tempo: "+"{:.4f}".format(k*h_t))
             plt.colorbar(cp, label='Anticorpo')
             plt.contourf(x_pts, y_pts, anticorpo_anterior,100)
-            plt.savefig('../results/anticorpos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
+            plt.savefig('../results_populational_model/anticorpos/fig'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
+            print("Tempo: "+ str(k*h_t))
 
 #Fim da contagem do tempo
 toc = time.perf_counter()
