@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import seaborn as sns
 import time
 
@@ -27,13 +26,13 @@ d_da = D_mac # difusao DC ativada(procurar na literatura)
 d_t_cit = D_mac # difusao t citotóxica(procurar na literatura)
 d_anti = D_mac # difusao anticorpo(procurar na literatura)
 lamb_f_m = 7.14*10**-2 # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia ( precisa converter!!!) 
-b_d = 0.1 # taxa de ativacao de dc por odc destruidos(procurar na literatura)
+b_d = 0.06 # taxa de ativacao de dc por odc destruidos(procurar na literatura)
 r_dc = 0.1 # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
 r_t = 0.1  # agressividade de t citotoxica(procurar na literatura)
 
 mu_dc = 60*24*3*10**-6 #Taxa de producao de células dendríticas (procurar na literatura)
-alpha_d = 0.1 #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
-gamma_anticorpo = 0.2 #Taxa de migração de anticorpos para o tecido (procurar na literatura)
+alpha_d = 0.0001 #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
+gamma_anticorpo = 0.43 #Taxa de migração de anticorpos para o tecido (procurar na literatura)
 gamma_tcito = 0.2 #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 da_linfonodo = 0 #DC ativadas no linfonodo (procurar na literatura) 
 anticorpo_linfonodo = 100 #Anticorpos no linfonodo (procurar na literatura)
@@ -88,6 +87,7 @@ steps = len(t)
 num_figuras = 10
 intervalo_figs = int(steps/num_figuras)
 
+da_linfonodo_vetor = np.zeros(steps)
 #Print da condicao inicial
 x_pts, y_pts = np.meshgrid(x, x)
             
@@ -248,8 +248,9 @@ for k in range(1,steps):
             #DC ativada
             difusao_da = d_da*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
 
-            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc - alpha_d*(da_linfonodo-da))
-            da_linfonodo = alpha_d*(da_linfonodo-da)
+            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc + alpha_d*(da_linfonodo-da))
+            
+            da_linfonodo = da_linfonodo - h_t*alpha_d*(da_linfonodo-da)
 
             if( mac_atual[i][j]<0):
                 print('tempo: '+str(k*h_t))
@@ -282,6 +283,7 @@ for k in range(1,steps):
     t_cito_anterior = np.copy(t_cito_atual)
     anticorpo_anterior = np.copy(anticorpo_atual)
     mac_anterior = np.copy(mac_atual)
+    da_linfonodo_vetor[k] = da_linfonodo
 
     if k%intervalo_figs ==0 or k == steps-1:
             x_pts, y_pts = np.meshgrid(x, x)
@@ -338,3 +340,6 @@ for k in range(1,steps):
 #Fim da contagem do tempo
 toc = time.perf_counter()
 print(f"Tempo de execução: {toc - tic:0.4f} segundos")
+
+plt.plot(t, da_linfonodo_vetor)
+plt.show()
