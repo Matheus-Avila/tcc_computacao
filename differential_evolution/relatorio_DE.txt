@@ -1,0 +1,24 @@
+
+
+-------NOVA TENTATIVA-------
+
+Population size: 3
+Number of generations: 2
+Tempo de execução: 12781.1069 segundos
+Custo do melhor conjunto de parametros: 10.0
+
+
+O melhor conjunto de parametros: [0.11601509 0.15659229 0.18642446 0.16110622 0.12808014 0.36486636]
+
+
+
+-------NOVA TENTATIVA-------
+
+Population size: 10
+Number of generations: 5
+Tempo de execução: 34374.8879 segundos
+Custo do melhor conjunto de parametros: 10.0
+
+
+O melhor conjunto de parametros: [0.37549052 0.40894643 0.45070771 0.24790231 0.07144847 0.18333481]
+

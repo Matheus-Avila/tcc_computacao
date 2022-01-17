@@ -22,25 +22,25 @@ def cost(poi):
     mu_m = 60*24*3*10**-6 # Taxa de ativação da microglia. valor por Dia
     r_m = 60*24*3.96*10**-6 # intensidade dos danos causados pela microglia valor por Dia
 
-    d_dc = D_mac # difusao DC convencional(procurar na literatura)
-    d_da = D_mac # difusao DC ativada(procurar na literatura)
+    d_dc = poi[0] # difusao DC convencional(procurar na literatura)
+    d_da = poi[1] # difusao DC ativada(procurar na literatura)
     d_t_cit = D_mac # difusao t citotóxica(procurar na literatura)
     d_anti = D_mac # difusao anticorpo(procurar na literatura)
     lamb_f_m = 7.14*10**-2 # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia ( precisa converter!!!) 
-    b_d = poi[0] # taxa de ativacao de dc por odc destruidos(procurar na literatura)
-    r_dc = poi[1] # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
-    r_t = poi[2]  # agressividade de t citotoxica(procurar na literatura)
+    b_d = poi[2] # taxa de ativacao de dc por odc destruidos(procurar na literatura)
+    r_dc = poi[3] # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
+    r_t = 0.1  # agressividade de t citotoxica(procurar na literatura)
 
-    mu_dc = 60*24*3*10**-6 #Taxa de producao de células dendríticas (procurar na literatura)
-    alpha_d = poi[3] #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
-    gamma_anticorpo = poi[4] #Taxa de migração de anticorpos para o tecido (procurar na literatura)
-    gamma_tcito = poi[5] #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
+    mu_dc = poi[4] #Taxa de producao de células dendríticas (procurar na literatura)
+    alpha_d = poi[5] #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
+    gamma_anticorpo = 0.43 #Taxa de migração de anticorpos para o tecido (procurar na literatura)
+    gamma_tcito = 0.2 #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
     da_linfonodo = 0 #DC ativadas no linfonodo (procurar na literatura) 
     anticorpo_linfonodo = 100 #Anticorpos no linfonodo (procurar na literatura)
     t_cito_linfonodo = 15 #T citotoxica no linfonodo (procurar na literatura)
 
     t_cito_media = 37
-    dc_media = 15 
+    dc_media = 10 
     mac_media = 350
     odc_media = 400
 
@@ -197,6 +197,7 @@ def cost(poi):
                 da_linfonodo = da_linfonodo - h_t*alpha_d*(da_linfonodo-da)
 
                 if( mac_atual[i][j]<0 or t_cito_atual[i][j]<0 or olide_atual[i][j]<0 or anticorpo_atual[i][j]<0 or dendritica_conv_atual[i][j]<0 or dendritica_ativ_atual[i][j]<0):
+                    print("Deu negativo!!!")
                     return 10
 
         olide_anterior = np.copy(olide_atual)
