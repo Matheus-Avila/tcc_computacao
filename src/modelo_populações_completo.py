@@ -36,9 +36,6 @@ mu_dc = 60*24*3*10**-4 #Taxa de producao de células dendríticas (procurar na l
 gamma_d = 0.0001 #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
 gamma_anticorpo = 0.43 #Taxa de migração de anticorpos para o tecido (procurar na literatura)
 gamma_tcito = 0.2 #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
-da_linfonodo = 0 #DC ativadas no linfonodo (procurar na literatura) 
-anticorpo_linfonodo = 100 #Anticorpos no linfonodo (procurar na literatura)
-t_cito_linfonodo = 15 #T citotoxica no linfonodo (procurar na literatura)
 
 t_cito_media = 37
 dc_media = 10 
@@ -49,8 +46,6 @@ V_LV = 1
 V_LN = 160
 V_BV = 1
 
-gamma_F = 0.43 # tese barbara
-gamma_T = 0.3 
 alpha_T_h = 0.01 # tese barbara
 alpha_T_c = 0.5
 alpha_B = 1
@@ -157,7 +152,6 @@ steps = len(t)
 num_figuras = 10
 intervalo_figs = int(steps/num_figuras)
 
-da_linfonodo_vetor = np.zeros(steps)
 DL_vetor = np.zeros(steps)
 TL_c_vetor = np.zeros(steps)
 TL_h_vetor = np.zeros(steps)
@@ -351,8 +345,6 @@ for k in range(1,steps):
             difusao_da = d_da*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
 
             dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc + gamma_d*(DL_atual - da))
-            
-            da_linfonodo = da_linfonodo - h_t*gamma_d*(da_linfonodo-da)
 
             if( mac_atual[i][j]<0):
                 print('tempo: '+str(k*h_t))
@@ -385,7 +377,6 @@ for k in range(1,steps):
     t_cito_anterior = np.copy(t_cito_atual)
     anticorpo_anterior = np.copy(anticorpo_atual)
     mac_anterior = np.copy(mac_atual)
-    da_linfonodo_vetor[k] = da_linfonodo
     DT = np.sum(dendritica_ativ_anterior)
     FT = np.sum(anticorpo_anterior)
     Tt_c = np.sum(t_cito_anterior)

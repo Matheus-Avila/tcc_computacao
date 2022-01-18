@@ -1,6 +1,5 @@
 # --- IMPORT DEPENDENCIES ------------------------------------------------------+
 
-import random
 import numpy as np
 from depend.cost import cost
 import matplotlib.pyplot as plt
@@ -13,14 +12,14 @@ import time
 # --- CONSTANTS ----------------------------------------------------------------+
 
 cost_func = cost                                  #Cost function
-bounds = [(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05)] 
-popsize = 3                                               #Population size
+bounds = [(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05)] 
+popsize = 100                                               #Population size
 # Mutation factor [0,2]
 mutate = 0.7
 # Recombination rate [0,1]
 recombination = 0.5
 # Max number of generations (maxiter)
-maxiter = 2
+maxiter = 8
 
 # --- RUN ----------------------------------------------------------------------+
 
