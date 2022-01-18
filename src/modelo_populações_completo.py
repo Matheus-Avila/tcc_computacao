@@ -33,7 +33,7 @@ r_dc = 0.1 # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
 r_t = 0.1  # agressividade de t citotoxica(procurar na literatura)
 
 mu_dc = 60*24*3*10**-4 #Taxa de producao de células dendríticas (procurar na literatura)
-alpha_d = 0.0001 #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
+gamma_d = 0.0001 #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
 gamma_anticorpo = 0.43 #Taxa de migração de anticorpos para o tecido (procurar na literatura)
 gamma_tcito = 0.2 #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 da_linfonodo = 0 #DC ativadas no linfonodo (procurar na literatura) 
@@ -46,54 +46,25 @@ mac_media = 350
 odc_media = 400
 
 V_LV = 1
-V_LN = 1
+V_LN = 160
 V_BV = 1
 
-rho_T = 1
-b_rho = 1
-alpha_T_h = 1
-estable_T_h = 1
-rho_B = 1
+gamma_F = 0.43 # tese barbara
+gamma_T = 0.3 
+alpha_T_h = 0.01 # tese barbara
+alpha_T_c = 0.5
 alpha_B = 1
-estable_B = 1
-rho_F = 1
-gamma_F = 1
-DT = 1
-FT = 1
-
-alpha_T_c = 1
-estable_T_c = 1
-gamma_T = 1
+b_T = 0.017
+b_rho = 10**5
+b_rho_b = 6.02*10**3
+rho_T = 2
+rho_B = 16
+rho_F = 5.1*10**4
+estable_T_h = 8.4*10**-3
+estable_B = 8.4*10**-4
+estable_T_c = 8.4*10**-3
 theta_BV = 1
-Tt_c = 1
-b_T = 1
 
-parameters = []
-
-parameters[0] = V_LV     # Volume of the domain areas in contact with lymph vessels
-parameters[1] = V_LN     # Volume of the lymph node
-parameters[2] = V_BV
-
-parameters[3] = alpha_d # Dendritic cells migration rate (Tissue -> Lymph node)
-parameters[4] = alpha_T_c  
-parameters[5] = estable_T_c
-parameters[6] = gamma_T    
-parameters[7] = theta_BV
-parameters[8] = Tt_c
-
-parameters[9] = b_T    
-parameters[10] = rho_T     
-parameters[11] = b_rho     
-parameters[12] = alpha_T_h     
-parameters[13] = estable_T_h 
-parameters[14] = rho_B     #* Replication rate of B cells
-parameters[15] = alpha_B   #* Replication rate of B cells 
-parameters[16] = estable_B # Estable B value
-
-parameters[17] = rho_F   # Antibodies production rate (by B cells) 
-parameters[18] = gamma_F # Antibodies migration rate (to tissue)
-parameters[19] = DT 
-parameters[20] = FT 
 
 # IC
 # Macrofagos
@@ -133,8 +104,38 @@ linfonodo_eqs[2]= 0.4  # Helper T cells
 linfonodo_eqs[3]= 0    # B cells
 linfonodo_eqs[4]= 0    # Antibodies
 
-TL_c_anterior = linfonodo_eqs[1]
-TL_h_anterior = linfonodo_eqs[2]
+DT = np.sum(dendritica_ativ_anterior)
+FT = np.sum(anticorpo_anterior)
+Tt_c = np.sum(t_cito_anterior)
+
+parameters = np.zeros(22)
+
+parameters[0] = V_LV     # Volume of the domain areas in contact with lymph vessels
+parameters[1] = V_LN     # Volume of the lymph node
+parameters[2] = V_BV
+
+parameters[3] = gamma_d # Dendritic cells migration rate (Tissue -> Lymph node)
+parameters[4] = alpha_T_c  
+parameters[5] = estable_T_c
+parameters[6] = gamma_tcito    
+parameters[7] = theta_BV
+parameters[8] = Tt_c
+
+parameters[9] = b_T    
+parameters[10] = rho_T     
+parameters[11] = b_rho     
+parameters[12] = alpha_T_h     
+parameters[13] = estable_T_h 
+parameters[14] = rho_B     #* Replication rate of B cells
+parameters[15] = alpha_B   #* Replication rate of B cells 
+parameters[16] = estable_B # Estable B value
+
+parameters[17] = rho_F   # Antibodies production rate (by B cells) 
+parameters[18] = gamma_anticorpo # Antibodies migration rate (to tissue)
+parameters[19] = DT 
+parameters[20] = FT 
+parameters[21] = b_rho_b
+
 
 DL_atual = 0     
 TL_c_atual = 0 
@@ -237,7 +238,7 @@ plt.clf()
 tic = time.perf_counter()
 
 for k in range(1,steps):
-    dy = diferential(linfonodo_eqs, np.sum(dendritica_ativ_anterior), np.sum(t_cito_anterior), np.sum(anticorpo_anterior))
+    dy = diferential(linfonodo_eqs, parameters)
     DL_atual = linfonodo_eqs[0] + h_t*dy[0]
     TL_c_atual = linfonodo_eqs[1] + h_t*dy[1]
     TL_h_atual = linfonodo_eqs[2] + h_t*dy[2]
@@ -349,9 +350,9 @@ for k in range(1,steps):
             #DC ativada
             difusao_da = d_da*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
 
-            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc + alpha_d*(DL_atual - da))
+            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc + gamma_d*(DL_atual - da))
             
-            da_linfonodo = da_linfonodo - h_t*alpha_d*(da_linfonodo-da)
+            da_linfonodo = da_linfonodo - h_t*gamma_d*(da_linfonodo-da)
 
             if( mac_atual[i][j]<0):
                 print('tempo: '+str(k*h_t))
@@ -385,6 +386,12 @@ for k in range(1,steps):
     anticorpo_anterior = np.copy(anticorpo_atual)
     mac_anterior = np.copy(mac_atual)
     da_linfonodo_vetor[k] = da_linfonodo
+    DT = np.sum(dendritica_ativ_anterior)
+    FT = np.sum(anticorpo_anterior)
+    Tt_c = np.sum(t_cito_anterior)
+    parameters[8] = Tt_c
+    parameters[19] = DT
+    parameters[20] = FT
 
     linfonodo_eqs = [DL_atual, TL_c_atual, TL_h_atual, B_atual, FL_atual]
     DL_vetor[k] = DL_atual
