@@ -87,7 +87,7 @@ def cost(poi):
     odc_media = 400
 
     V_LV = 1
-    V_LN = 160
+    V_LN = 1
     V_BV = 1
     alpha_T_h = 0.01 # tese barbara
     alpha_T_c = 0.5

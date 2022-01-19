@@ -42,8 +42,8 @@ dc_media = 10
 mac_media = 350
 odc_media = 400
 
-V_LV = 1
-V_LN = 160
+V_LV = 1 
+V_LN = 1
 V_BV = 1
 
 alpha_T_h = 0.01 # tese barbara
@@ -99,9 +99,9 @@ linfonodo_eqs[2]= 0.4  # Helper T cells
 linfonodo_eqs[3]= 0    # B cells
 linfonodo_eqs[4]= 0    # Antibodies
 
-DT = np.sum(dendritica_ativ_anterior)
-FT = np.sum(anticorpo_anterior)
-Tt_c = np.sum(t_cito_anterior)
+DT = np.sum(dendritica_ativ_anterior)/V_LV
+FT = np.sum(anticorpo_anterior)/V_BV
+Tt_c = np.sum(t_cito_anterior)/V_BV
 
 parameters = np.zeros(22)
 
@@ -377,9 +377,9 @@ for k in range(1,steps):
     t_cito_anterior = np.copy(t_cito_atual)
     anticorpo_anterior = np.copy(anticorpo_atual)
     mac_anterior = np.copy(mac_atual)
-    DT = np.sum(dendritica_ativ_anterior)
-    FT = np.sum(anticorpo_anterior)
-    Tt_c = np.sum(t_cito_anterior)
+    DT = np.sum(dendritica_ativ_anterior)/V_LV
+    FT = np.sum(anticorpo_anterior)/V_BV
+    Tt_c = np.sum(t_cito_anterior)/V_BV
     parameters[8] = Tt_c
     parameters[19] = DT
     parameters[20] = FT

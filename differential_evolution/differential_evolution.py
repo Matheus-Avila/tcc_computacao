@@ -12,8 +12,8 @@ import time
 # --- CONSTANTS ----------------------------------------------------------------+
 
 cost_func = cost                                  #Cost function
-bounds = [(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05),(0.00001,0.05)] 
-popsize = 100                                               #Population size
+bounds = [(0.000001,0.5),(0.000001,0.5),(0.000001,0.5),(0.000001,0.5),(0.000001,0.5)] 
+popsize = 1000                                               #Population size
 # Mutation factor [0,2]
 mutate = 0.7
 # Recombination rate [0,1]
