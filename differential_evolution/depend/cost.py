@@ -62,10 +62,10 @@ def cost(poi):
     # L = 100
     h_x = 0.1# 0.05
 
-    chi = 0.298*60*24  # Quimioatracao(a mesma para todas as celulas por enquanto). valor por Dia
-    D_mac = 60*24*6.6*10**-5 # Difusao da microglia. valor por Dia
-    mu_m = 60*24*3*10**-6 # Taxa de ativação da microglia. valor por Dia
-    r_m = 60*24*3.96*10**-6 # intensidade dos danos causados pela microglia valor por Dia
+    chi = poi[5]# 0.298*60*24  # Quimioatracao(a mesma para todas as celulas por enquanto). valor por Dia
+    D_mac = poi[6] # 60*24*6.6*10**-5 # Difusao da microglia. valor por Dia
+    mu_m = poi[7] # 60*24*3*10**-6 # Taxa de ativação da microglia. valor por Dia
+    r_m = poi[8] # 60*24*3.96*10**-6 # intensidade dos danos causados pela microglia valor por Dia
 
     d_dc = poi[0] # difusao DC convencional(procurar na literatura)
     d_da = poi[1] # difusao DC ativada(procurar na literatura)
@@ -80,9 +80,9 @@ def cost(poi):
     gamma_d = poi[4] #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
     gamma_anticorpo = 0.43 #Taxa de migração de anticorpos para o tecido 
     gamma_tcito = 0.3 #Taxa de migração de T citotoxica para o tecido 
-    
+
     t_cito_media = 37
-    dc_media = 10 
+    dc_media = 5 
     mac_media = 350
     odc_media = 400
 
@@ -303,7 +303,6 @@ def cost(poi):
                 #DC convencional
                 quimiotaxia_dc = chi*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
                 difusao_dc = d_dc*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
-                # reacao_dc = mu_dc*(dc_media- dc)
                 reacao_dc = mu_dc*oligo_destr*(dc_media- dc)
 
                 dendritica_conv_atual[i][j] = dc + h_t*(reacao_dc + difusao_dc - quimiotaxia_dc - b_d*oligo_destr*dc)

@@ -38,7 +38,7 @@ gamma_anticorpo = 0.43 #Taxa de migração de anticorpos para o tecido (procurar
 gamma_tcito = 0.2 #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 
 t_cito_media = 37
-dc_media = 10 
+dc_media = 5 
 mac_media = 350
 odc_media = 400
 
