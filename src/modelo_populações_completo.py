@@ -11,12 +11,20 @@ gradiente = lambda ponto_anterior, ponto_posterior, valor_maximo: quimiotaxia(po
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-T_final = 1 # 0.01# Dia
-h_t = 0.05
+T_final = 0.5 # 1# Dia
+h_t = 0.001
 
-L = 10#25.8  # Comprimento da malha
+L = 25.8  # Comprimento da malha
 # L = 100
 h_x = 0.1# 0.05
+
+t = np.linspace(0, T_final, int(T_final/h_t))
+x = np.linspace(0, L, int(L/h_x))
+tam = len(x)
+steps = len(t)
+
+num_figuras = 5 #10
+intervalo_figs = int(steps/num_figuras)
 
 chi = 0.298*60*2  # Quimioatracao(a mesma para todas as celulas por enquanto). valor por Dia
 D_mac = 60*24*6.6*10**-5 # Difusao da microglia. valor por Dia
@@ -144,14 +152,6 @@ bc_neumann_direita = 0
 bc_neumann_baixo = 0
 bc_neumann_esquerda = 0
 
-t = np.linspace(0, T_final, int(T_final/h_t))
-x = np.linspace(0, L, int(L/h_x))
-tam = len(x)
-steps = len(t)
-
-num_figuras = 10
-intervalo_figs = int(steps/num_figuras)
-
 DL_vetor = np.zeros(steps)
 TL_c_vetor = np.zeros(steps)
 TL_h_vetor = np.zeros(steps)
@@ -164,11 +164,13 @@ x_pts, y_pts = np.meshgrid(x, x)
 #results odc
 
 max_odc = np.max(olide_anterior) + 1
-levels = np.linspace(0, max_odc, 10)
+levels = np.linspace(0, max_odc, 7)
 
 cp = plt.contourf(x_pts, y_pts,olide_anterior, levels=levels)
-plt.title("Tempo: 0")
-plt.colorbar(cp, label='ODC-destruidos')
+plt.title("Oligodendrócitos destruídos")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label='Concentração')
 plt.savefig('../results_populational_model/oligodendrocitos/fig0', dpi = 300)
 plt.clf()
 
@@ -178,8 +180,10 @@ max_mac = np.max(mac_anterior)
 levels = np.linspace(0, max_mac, 10)
 
 cp = plt.contourf(x_pts, y_pts,mac_anterior, levels=levels)
-plt.title("Tempo: 0")
-plt.colorbar(cp, label='Macrófagos')
+plt.title("Micróglia")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label='Concentração')
 plt.savefig('../results_populational_model/microglia/fig0', dpi = 300)
 plt.clf()
 
@@ -189,8 +193,10 @@ max_dc = np.max(dendritica_conv_anterior)
 levels = np.linspace(0, max_dc, 10)
 
 cp = plt.contourf(x_pts, y_pts,dendritica_conv_anterior, levels=levels)
-plt.title("Tempo: 0")
-plt.colorbar(cp, label='DC- convencional')
+plt.title("Dendríticas convencionais")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label='Concentração')
 plt.savefig('../results_populational_model/dendriticas_convencionais/fig0', dpi = 300)
 plt.clf()
 
@@ -201,8 +207,10 @@ max_dca = np.max(dendritica_ativ_anterior) + 1
 levels = np.linspace(0, max_dca, 10)
 
 cp = plt.contourf(x_pts, y_pts,dendritica_ativ_anterior, levels=levels)
-plt.title("Tempo: 0")
-plt.colorbar(cp, label='DC- ativada')
+plt.title("Dendríticas ativadas")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label='Concentração')
 plt.savefig('../results_populational_model/dendriticas_ativadas/fig0', dpi = 300)
 plt.clf()
 
@@ -212,8 +220,10 @@ max_t_cito = np.max(t_cito_anterior) +1
 levels = np.linspace(0, max_t_cito, 10)
 
 cp = plt.contourf(x_pts, y_pts,t_cito_anterior, levels=levels)
-plt.title("Tempo: 0")
-plt.colorbar(cp, label='T citotóxica')
+plt.title("T citotóxicas")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label='Concentração')
 plt.savefig('../results_populational_model/t_citotoxica/fig0', dpi = 300)
 plt.clf()
 
@@ -223,8 +233,10 @@ max_anticorpo = np.max(anticorpo_anterior) +1
 levels = np.linspace(0, max_anticorpo, 10)
 
 cp = plt.contourf(x_pts, y_pts,anticorpo_anterior, levels=levels)
-plt.title("Tempo: 0")
-plt.colorbar(cp, label='Anticorpo')
+plt.title("Anticorpos")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label='Concentração')
 plt.savefig('../results_populational_model/anticorpos/fig0', dpi = 300)
 plt.clf()
 
@@ -419,8 +431,10 @@ for k in range(1,steps):
             levels = np.linspace(0, max_odc, 10)
 
             cp = plt.contourf(x_pts, y_pts,olide_anterior)#, levels=levels)
-            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='ODC-destruidos')
+            plt.title("Oligodendrócitos destruídos")
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label='Concentração')
             plt.savefig('../results_populational_model/oligodendrocitos/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -430,8 +444,10 @@ for k in range(1,steps):
             levels = np.linspace(0, max_mac, 10)
 
             cp = plt.contourf(x_pts, y_pts,mac_anterior)#, levels=levels)
-            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='Macrófagos')
+            plt.title("Micróglia")
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label='Concentração')
             plt.savefig('../results_populational_model/microglia/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -441,8 +457,10 @@ for k in range(1,steps):
             levels = np.linspace(0, max_dc, 10)
 
             cp = plt.contourf(x_pts, y_pts,dendritica_conv_anterior)#, levels=levels)
-            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='DC- convencional')
+            plt.title("Dendríticas convencionais")
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label='Concentração')
             plt.savefig('../results_populational_model/dendriticas_convencionais/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -453,8 +471,10 @@ for k in range(1,steps):
             levels = np.linspace(0, max_dca, 10)
 
             cp = plt.contourf(x_pts, y_pts,dendritica_ativ_anterior)#, levels=levels)
-            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='DC- ativada')
+            plt.title("Dendríticas ativadas")
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label='Concentração')
             plt.savefig('../results_populational_model/dendriticas_ativadas/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -464,8 +484,10 @@ for k in range(1,steps):
             levels = np.linspace(0, max_t_cito, 10)
 
             cp = plt.contourf(x_pts, y_pts,t_cito_anterior)#, levels=levels)
-            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='T citotóxica')
+            plt.title("T citotóxicas")
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label='Concentração')
             plt.savefig('../results_populational_model/t_citotoxica/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -475,36 +497,52 @@ for k in range(1,steps):
             levels = np.linspace(0, max_anticorpo, 10)
 
             cp = plt.contourf(x_pts, y_pts,anticorpo_anterior)#, levels=levels)
-            plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            plt.colorbar(cp, label='Anticorpo')
+            plt.title("Anticorpos")
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label='Concentração')
             plt.savefig('../results_populational_model/anticorpos/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             print("Tempo: "+ str(k*h_t))
 
 #Fim da contagem do tempo
 toc = time.perf_counter()
+
+#Transforma de dias para horas no plot
+t = np.multiply(t,24)
+
 plt.plot(t,DL_vetor)
-plt.title("DC_linfonodo")
+plt.title("Dendríticas ativadas no linfonodo")
+plt.xlabel("Tempo (horas)")
+plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/dc_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,TL_c_vetor)
-plt.title("t_cito_linfonodo")
+plt.title("T citotóxicas no linfonodo")
+plt.xlabel("Tempo (horas)")
+plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/t_cito_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,TL_h_vetor)
-plt.title("t_helper_linfonodo")
+plt.title("T helper no linfonodo")
+plt.xlabel("Tempo (horas)")
+plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/t_helper_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,B_vetor)
-plt.title("b_cell_linfonodo")
+plt.title("Células B no linfonodo")
+plt.xlabel("Tempo (horas)")
+plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/b_cell_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,FL_vetor)
-plt.title("anticorpo_linfonodo")
+plt.title("Anticorpos no linfonodo")
+plt.xlabel("Tempo (horas)")
+plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/anticorpo_linfonodo.png', dpi = 300)
 plt.clf()
 

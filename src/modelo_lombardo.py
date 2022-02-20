@@ -26,7 +26,7 @@ mac_atual = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 20:
-            mac_atual[i][j] = 0.2
+            mac_atual[i][j] = 0.3
 
 # mac_atual[int(0.45*L/h_x):int(0.55*L/h_x)+1, int(0.45*L/h_x):int(0.55*L/h_x)+1] = 1
 mac_anterior = np.copy(mac_atual)
@@ -49,7 +49,7 @@ x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
-p = int(steps/10)
+p = int(steps/7)
 
 sol_tempo_d = []
 sol_tempo_d.append(olide_anterior)
@@ -58,7 +58,7 @@ sol_tempo_m.append(mac_anterior)
 
 #Funcoes para escolha de Chi(m)
 
-for k in range(steps):
+for k in range(1,steps):
     for i in range(tam):
         for j in range(tam):
             d = olide_anterior[i][j]
@@ -131,8 +131,8 @@ for k in range(steps):
     if k%p ==0 or k == steps-1:
             x_pts, y_pts = np.meshgrid(x, x)
             cp = plt.contourf(x_pts, y_pts,olide_anterior, 100)
-            plt.title("Tempo: "+"{:.2f}".format(k*h_t)+ "dias")
-            plt.colorbar(cp, label='Oligodendrócitos-destruidos')
+            plt.title("Oligodendrócitos-destruidos")
+            plt.colorbar(cp, label='Concentração')
             plt.contourf(x_pts, y_pts, olide_anterior,100)
             plt.savefig('../results/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
