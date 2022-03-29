@@ -49,6 +49,17 @@ x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
+x_print = np.multiply(x,0.258)
+x_pts, y_pts = np.meshgrid(x_print, x_print)
+cp = plt.contourf(x_pts, y_pts,olide_anterior, 100)
+plt.title("Oligodendrócitos-destruidos")
+plt.xlabel("Milímetros")
+plt.ylabel("Milímetros")
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
+plt.contourf(x_pts, y_pts, olide_anterior,100)
+plt.savefig('../results/0.png', dpi = 300)
+plt.clf()
+
 p = int(steps/7)
 
 sol_tempo_d = []
@@ -71,10 +82,10 @@ for k in range(1,steps):
             mac_ijm = mac_anterior[i][j-1] if j != 0 else m - 2*h_x*u_d
             
             # condição de contorno de Neumman oligodendrocitos destruidos
-            olide_ipj = olide_anterior[i+1][j] if i != tam-1 else d - 2*h_x*u_c
-            olide_imj = olide_anterior[i-1][j] if i != 0 else d - 2*h_x*u_b
-            olide_ijp = olide_anterior[i][j+1] if j != tam-1 else d - 2*h_x*u_c
-            olide_ijm = olide_anterior[i][j-1] if j != 0 else d - 2*h_x*u_d
+            olide_ipj = olide_anterior[i+1][j] if i != tam-1 else d
+            olide_imj = olide_anterior[i-1][j] if i != 0 else d
+            olide_ijp = olide_anterior[i][j+1] if j != tam-1 else d
+            olide_ijm = olide_anterior[i][j-1] if j != 0 else d
 
             # condição de contorno de Neumman citocinas
             cit_ipj = cit_anterior[i+1][j] if i != tam-1 else c - 2*h_x*u_c
@@ -129,10 +140,12 @@ for k in range(1,steps):
     cit_anterior = np.copy(cit_atual)
     olide_anterior = np.copy(olide_atual)
     if k%p ==0 or k == steps-1:
-            x_pts, y_pts = np.meshgrid(x, x)
+            x_pts, y_pts = np.meshgrid(x_print, x_print)
             cp = plt.contourf(x_pts, y_pts,olide_anterior, 100)
             plt.title("Oligodendrócitos-destruidos")
-            plt.colorbar(cp, label='Concentração')
+            plt.xlabel("Milímetros")
+            plt.ylabel("Milímetros")
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.contourf(x_pts, y_pts, olide_anterior,100)
             plt.savefig('../results/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             plt.clf()
@@ -140,7 +153,9 @@ for k in range(1,steps):
             # x_pts, y_pts = np.meshgrid(x, x)
             # cp = plt.contourf(x_pts, y_pts,mac_anterior, 100)
             # plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            # plt.colorbar(cp, label='microglia')
+            # plt.xlabel("Milímetros")
+            # plt.ylabel("Milímetros")
+            # plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             # plt.contourf(x_pts, y_pts, mac_anterior,100)
             # plt.savefig('figs/microglia/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             # plt.clf()
@@ -148,7 +163,9 @@ for k in range(1,steps):
             # x_pts, y_pts = np.meshgrid(x, x)
             # cp = plt.contourf(x_pts, y_pts,cit_anterior, 100)
             # plt.title("Tempo: "+"{:.4f}".format(k*h_t))
-            # plt.colorbar(cp, label='citocinas')
+            # plt.xlabel("Milímetros")
+            # plt.ylabel("Milímetros")
+            # plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             # plt.contourf(x_pts, y_pts, cit_anterior,100)
             # plt.savefig('figs/citocina/'+"{:.4f}".format(k*h_t)+'.png', dpi = 300)
             # plt.clf()

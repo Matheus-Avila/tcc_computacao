@@ -15,7 +15,6 @@ T_final = 0.5 # 1# Dia
 h_t = 0.001
 
 L = 25.8  # Comprimento da malha
-# L = 100
 h_x = 0.1# 0.05
 
 t = np.linspace(0, T_final, int(T_final/h_t))
@@ -35,12 +34,12 @@ d_dc = D_mac # difusao DC convencional(procurar na literatura)
 d_da = D_mac # difusao DC ativada(procurar na literatura)
 d_t_cit = D_mac # difusao t citotóxica(procurar na literatura)
 d_anti = D_mac # difusao anticorpo(procurar na literatura)
-lamb_f_m = 7.14*10**-2 # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
+lamb_f_m = r_m # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
 b_d = 0.0001 # taxa de ativacao de dc por odc destruidos(procurar na literatura)
 r_dc = 0.001 # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
 r_t = 0.1  # agressividade de t citotoxica(procurar na literatura)
 
-mu_dc = 60*24*3*10**-4 #Taxa de producao de células dendríticas (procurar na literatura)
+mu_dc = 60*24*3*10**-6 #Taxa de producao de células dendríticas (procurar na literatura)
 gamma_d = 0.0001 #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
 gamma_anticorpo = 0.0003 #Taxa de migração de anticorpos para o tecido (procurar na literatura)
 gamma_tcito = 0.2 #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
@@ -50,9 +49,24 @@ dc_media = 5
 mac_media = 350
 odc_media = 400
 
-V_LV = 1 
-V_LN = 1
-V_BV = 1
+V_BV = 0
+V_LV = 0
+
+theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
+for i in range(int(L/h_x)):
+    for j in range(int(L/h_x)):
+        if i > L/h_x*.8 and j > L/h_x*.8:
+            theta_BV[i][j] = 1
+            V_LV += 1
+
+theta_LV = np.zeros((int(L/h_x), int(L/h_x)))
+for i in range(int(L/h_x)):
+    for j in range(int(L/h_x)):
+        if i > L/h_x*.8 and j > L/h_x*.8:
+            theta_LV[i][j] = 1
+            V_BV += 1
+
+V_LN = 160
 
 alpha_T_h = 0.01 
 alpha_T_c = 0.5
@@ -66,8 +80,6 @@ rho_F = 5.1*10**4
 estable_T_h = 8.4*10**-3
 estable_B = 8.4*10**-4
 estable_T_c = 8.4*10**-3
-theta_BV = 1
-
 
 # IC
 # microglia
@@ -107,11 +119,20 @@ linfonodo_eqs[2]= 0.4  # Helper T cells
 linfonodo_eqs[3]= estable_B    # B cells
 linfonodo_eqs[4]= 0    # Antibodies
 
-DT = np.sum(dendritica_ativ_anterior)/V_LV
-FT = np.sum(anticorpo_anterior)/V_BV
-Tt_c = np.sum(t_cito_anterior)/V_BV
+#Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
+DT = 0
+FT = 0
+Tt_c = 0
 
-parameters = np.zeros(22)
+for i in range(int(L/h_x)):
+    for j in range(int(L/h_x)):
+        if theta_LV[i][j] == 1:
+            DT += dendritica_ativ_anterior[i][j]
+        if theta_BV[i][j] == 1:
+            FT += anticorpo_anterior[i][j]
+            Tt_c += t_cito_anterior[i][j]
+
+parameters = np.zeros(21)
 
 parameters[0] = V_LV     # Volume of the domain areas in contact with lymph vessels
 parameters[1] = V_LN     # Volume of the lymph node
@@ -121,7 +142,7 @@ parameters[3] = gamma_d # Dendritic cells migration rate (Tissue -> Lymph node)
 parameters[4] = alpha_T_c  
 parameters[5] = estable_T_c
 parameters[6] = gamma_tcito    
-parameters[7] = theta_BV
+parameters[7] = b_rho_b
 parameters[8] = Tt_c
 
 parameters[9] = b_T    
@@ -137,7 +158,6 @@ parameters[17] = rho_F   # Antibodies production rate (by B cells)
 parameters[18] = gamma_anticorpo # Antibodies migration rate (to tissue)
 parameters[19] = DT 
 parameters[20] = FT 
-parameters[21] = b_rho_b
 
 
 DL_atual = 0     
@@ -163,14 +183,14 @@ x_pts, y_pts = np.meshgrid(x, x)
 
 #results odc
 
-max_odc = np.max(olide_anterior) + 1
-levels = np.linspace(0, max_odc, 7)
+max_odc = np.max(olide_anterior) +1
+levels = np.linspace(0, max_odc, 10)
 
 cp = plt.contourf(x_pts, y_pts,olide_anterior, levels=levels)
 plt.title("Oligodendrócitos destruídos")
 plt.xlabel("Milímetros")
 plt.ylabel("Milímetros")
-plt.colorbar(cp, label='Concentração')
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/oligodendrocitos/fig0', dpi = 300)
 plt.clf()
 
@@ -183,7 +203,7 @@ cp = plt.contourf(x_pts, y_pts,mac_anterior, levels=levels)
 plt.title("Micróglia")
 plt.xlabel("Milímetros")
 plt.ylabel("Milímetros")
-plt.colorbar(cp, label='Concentração')
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/microglia/fig0', dpi = 300)
 plt.clf()
 
@@ -196,7 +216,7 @@ cp = plt.contourf(x_pts, y_pts,dendritica_conv_anterior, levels=levels)
 plt.title("Dendríticas convencionais")
 plt.xlabel("Milímetros")
 plt.ylabel("Milímetros")
-plt.colorbar(cp, label='Concentração')
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/dendriticas_convencionais/fig0', dpi = 300)
 plt.clf()
 
@@ -210,7 +230,7 @@ cp = plt.contourf(x_pts, y_pts,dendritica_ativ_anterior, levels=levels)
 plt.title("Dendríticas ativadas")
 plt.xlabel("Milímetros")
 plt.ylabel("Milímetros")
-plt.colorbar(cp, label='Concentração')
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/dendriticas_ativadas/fig0', dpi = 300)
 plt.clf()
 
@@ -223,7 +243,7 @@ cp = plt.contourf(x_pts, y_pts,t_cito_anterior, levels=levels)
 plt.title("T citotóxicas")
 plt.xlabel("Milímetros")
 plt.ylabel("Milímetros")
-plt.colorbar(cp, label='Concentração')
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/t_citotoxica/fig0', dpi = 300)
 plt.clf()
 
@@ -236,7 +256,7 @@ cp = plt.contourf(x_pts, y_pts,anticorpo_anterior, levels=levels)
 plt.title("Anticorpos")
 plt.xlabel("Milímetros")
 plt.ylabel("Milímetros")
-plt.colorbar(cp, label='Concentração')
+plt.colorbar(cp, label="Concentração (células/$mm^2$)")
 plt.savefig('../results_populational_model/anticorpos/fig0', dpi = 300)
 plt.clf()
 
@@ -278,7 +298,7 @@ for k in range(1,steps):
             da_ijp = dendritica_ativ_anterior[i][j+1] if j != tam-1 else da - 2*h_x*bc_neumann_direita
             da_ijm = dendritica_ativ_anterior[i][j-1] if j != 0 else da - 2*h_x*bc_neumann_esquerda
             
-            # condição de contorno de Neumman oligodendrocitos destruidos ODC é EDO!!! Nao tem BC!!!! Desse jeito ta certo?
+            # ponto fantasma oligodendrocitos destruidos ODC Nao é contorno
             olide_ipj = olide_anterior[i+1][j] if i != tam-1 else oligo_destr
             olide_imj = olide_anterior[i-1][j] if i != 0 else oligo_destr
             olide_ijp = olide_anterior[i][j+1] if j != tam-1 else oligo_destr
@@ -320,7 +340,6 @@ for k in range(1,steps):
                 gradiente_dc_j = gradiente(dc_ijp, dc, dc_media)/h_x
                 gradiente_t_j = gradiente(t_cito_ijp, t_cito, t_cito_media)/h_x
 
-
             #Dados da equacao microglia
             quimiotaxia_mac = chi*(gradiente_odc_i*gradiente_m_i + gradiente_odc_j*gradiente_m_j)
             difusao_mac = D_mac*(mac_ipj + mac_imj - 4*microglia + mac_ijp + mac_ijm )/h_x**2
@@ -331,7 +350,7 @@ for k in range(1,steps):
             #T citotóxica
             quimiotaxia_t_cito = chi*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
             difusao_t_cito = d_t_cit*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
-            migracao_t_cito = gamma_tcito*(TL_c_atual - t_cito)
+            migracao_t_cito = theta_BV[i][j]*gamma_tcito*(TL_c_atual - t_cito)
             
             t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
 
@@ -341,7 +360,7 @@ for k in range(1,steps):
             #Anticorpo
             difusao_anticorpo = d_anti*(f_ipj + f_imj - 4*anticorpo + f_ijp + f_ijm)
             reacao_anticorpo = -lamb_f_m*anticorpo*(odc_media - oligo_destr)*f_func(microglia, mac_media)
-            migracao_anticorpo = gamma_anticorpo*(FL_atual - anticorpo)
+            migracao_anticorpo = theta_BV[i][j]*gamma_anticorpo*(FL_atual - anticorpo)
 
             anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo + reacao_anticorpo + migracao_anticorpo)
 
@@ -355,62 +374,28 @@ for k in range(1,steps):
             #DC ativada
             difusao_da = d_da*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
 
-            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc + gamma_d*(DL_atual - da))
-
-            if( mac_atual[i][j]<0):
-                print('tempo: '+str(k*h_t))
-                print("Mac:"+str(mac_atual[i][j]))
-
-            if(t_cito_atual[i][j]<0):
-                print('tempo: '+str(k*h_t))
-                print("t_cito:"+str(t_cito_atual[i][j]))
-
-            if(olide_atual[i][j]<0):
-                print('tempo: '+str(k*h_t))
-                print("olide:"+str(olide_atual[i][j]))
-
-            if(anticorpo_atual[i][j]<0):
-                print('tempo: '+str(k*h_t))
-                print("anticorpo:"+str(anticorpo_atual[i][j]))
-
-            if(dendritica_conv_atual[i][j]<0):
-                print('tempo: '+str(k*h_t))
-                print("dendritica_conv_atual:"+str(dendritica_conv_atual[i][j]))
-
-            if(dendritica_ativ_atual[i][j]<0):
-                print('tempo: '+str(k*h_t))
-                print("dendritica_ativa_atual:"+str(dendritica_ativ_atual[i][j]))
+            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + b_d*oligo_destr*dc + theta_LV[i][j]*gamma_d*(DL_atual - da))
             
-    if(DL_atual < 0):
-        print('tempo: '+str(k*h_t))
-        print("DC_linf:"+str(DL_atual))
-
-    if(TL_c_atual < 0):
-        print('tempo: '+str(k*h_t))
-        print("TL_C_linf:"+str(TL_c_atual))
-
-    if(TL_h_atual < 0):
-        print('tempo: '+str(k*h_t))
-        print("TL_H_linf:"+str(TL_h_atual))
-
-    if(B_atual < 0):
-        print('tempo: '+str(k*h_t))
-        print("B_linf:"+str(B_atual))
-
-    if(FL_atual < 0):
-        print('tempo: '+str(k*h_t))
-        print("FL_linf:"+str(FL_atual))
-            
-
     olide_anterior = np.copy(olide_atual)
     dendritica_conv_anterior = np.copy(dendritica_conv_atual)
     dendritica_ativ_anterior = np.copy(dendritica_ativ_atual)
     t_cito_anterior = np.copy(t_cito_atual)
     anticorpo_anterior = np.copy(anticorpo_atual)
     mac_anterior = np.copy(mac_atual)
-    DT = np.sum(dendritica_ativ_anterior)/V_LV
-    FT = np.sum(anticorpo_anterior)/V_BV
-    Tt_c = np.sum(t_cito_anterior)/V_BV
+    
+    #Atualização da concentração das populações que migram.
+    #Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
+    DT = 0
+    FT = 0
+    Tt_c = 0
+
+    for i in range(int(L/h_x)):
+        for j in range(int(L/h_x)):
+            if theta_LV[i][j] == 1:
+                DT += dendritica_ativ_anterior[i][j]
+            if theta_BV[i][j] == 1:
+                FT += anticorpo_anterior[i][j]
+                Tt_c += t_cito_anterior[i][j]
     parameters[8] = Tt_c
     parameters[19] = DT
     parameters[20] = FT
@@ -428,13 +413,13 @@ for k in range(1,steps):
             #results odc
 
             max_odc = np.max(olide_anterior)
-            levels = np.linspace(0, max_odc, 10)
+            levels = np.linspace(0, max_odc, 60)
 
-            cp = plt.contourf(x_pts, y_pts,olide_anterior)#, levels=levels)
+            cp = plt.contourf(x_pts, y_pts,olide_anterior, levels=levels)
             plt.title("Oligodendrócitos destruídos")
             plt.xlabel("Milímetros")
             plt.ylabel("Milímetros")
-            plt.colorbar(cp, label='Concentração')
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.savefig('../results_populational_model/oligodendrocitos/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -443,11 +428,11 @@ for k in range(1,steps):
             max_mac = np.max(mac_anterior)
             levels = np.linspace(0, max_mac, 10)
 
-            cp = plt.contourf(x_pts, y_pts,mac_anterior)#, levels=levels)
+            cp = plt.contourf(x_pts, y_pts,mac_anterior, levels=levels)
             plt.title("Micróglia")
             plt.xlabel("Milímetros")
             plt.ylabel("Milímetros")
-            plt.colorbar(cp, label='Concentração')
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.savefig('../results_populational_model/microglia/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -456,11 +441,11 @@ for k in range(1,steps):
             max_dc = np.max(dendritica_conv_anterior)
             levels = np.linspace(0, max_dc, 10)
 
-            cp = plt.contourf(x_pts, y_pts,dendritica_conv_anterior)#, levels=levels)
+            cp = plt.contourf(x_pts, y_pts,dendritica_conv_anterior, levels=levels)
             plt.title("Dendríticas convencionais")
             plt.xlabel("Milímetros")
             plt.ylabel("Milímetros")
-            plt.colorbar(cp, label='Concentração')
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.savefig('../results_populational_model/dendriticas_convencionais/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -470,11 +455,11 @@ for k in range(1,steps):
             max_dca = np.max(dendritica_ativ_anterior)
             levels = np.linspace(0, max_dca, 10)
 
-            cp = plt.contourf(x_pts, y_pts,dendritica_ativ_anterior)#, levels=levels)
+            cp = plt.contourf(x_pts, y_pts,dendritica_ativ_anterior, levels=levels)
             plt.title("Dendríticas ativadas")
             plt.xlabel("Milímetros")
             plt.ylabel("Milímetros")
-            plt.colorbar(cp, label='Concentração')
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.savefig('../results_populational_model/dendriticas_ativadas/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -483,11 +468,11 @@ for k in range(1,steps):
             max_t_cito = np.max(t_cito_anterior)
             levels = np.linspace(0, max_t_cito, 10)
 
-            cp = plt.contourf(x_pts, y_pts,t_cito_anterior)#, levels=levels)
+            cp = plt.contourf(x_pts, y_pts,t_cito_anterior, levels=levels)
             plt.title("T citotóxicas")
             plt.xlabel("Milímetros")
             plt.ylabel("Milímetros")
-            plt.colorbar(cp, label='Concentração')
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.savefig('../results_populational_model/t_citotoxica/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
 
@@ -496,11 +481,11 @@ for k in range(1,steps):
             max_anticorpo = np.max(anticorpo_anterior)
             levels = np.linspace(0, max_anticorpo, 10)
 
-            cp = plt.contourf(x_pts, y_pts,anticorpo_anterior)#, levels=levels)
+            cp = plt.contourf(x_pts, y_pts,anticorpo_anterior, levels=levels)
             plt.title("Anticorpos")
             plt.xlabel("Milímetros")
             plt.ylabel("Milímetros")
-            plt.colorbar(cp, label='Concentração')
+            plt.colorbar(cp, label="Concentração (células/$mm^2$)")
             plt.savefig('../results_populational_model/anticorpos/fig'+'{:.4f}'.format(k*h_t)+'.png', dpi = 300)
             plt.clf()
             print("Tempo: "+ str(k*h_t))
