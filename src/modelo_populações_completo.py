@@ -11,18 +11,18 @@ gradiente = lambda ponto_anterior, ponto_posterior, valor_maximo: quimiotaxia(po
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-T_final = 0.5 # 1# Dia
+T_final = 0.3 # 1# Dia
 h_t = 0.001
 
 L = 25.8  # Comprimento da malha
-h_x = 0.1# 0.05
+h_x = 0.1
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
-num_figuras = 5 #10
+num_figuras = 5
 intervalo_figs = int(steps/num_figuras)
 
 chi = 0.298*60*2  # Quimioatracao(a mesma para todas as celulas por enquanto). valor por Dia
