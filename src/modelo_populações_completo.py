@@ -34,14 +34,14 @@ V_LV = 0
 theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
-        if i > L/h_x*.8 and j > L/h_x*.8:
+        if i > L/h_x*.9 and j > L/h_x*.9:
             theta_BV[i][j] = 1
             V_LV += 1
 
 theta_LV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
-        if i > L/h_x*.8 and j > L/h_x*.8:
+        if i < L/h_x*.1 and j < L/h_x*.1:
             theta_LV[i][j] = 1
             V_BV += 1
 
@@ -191,8 +191,8 @@ printMesh(0,olide_anterior, "odc")
 printMesh(0,mic_anterior, "microglia")
 printMesh(0,dendritica_conv_anterior, "dc")
 printMesh(0,dendritica_ativ_anterior, "da")
-printMesh(0,t_cito_anterior, "tke")
-printMesh(0,anticorpo_anterior, "anticorpo")
+# printMesh(0,t_cito_anterior, "tke")
+# printMesh(0,anticorpo_anterior, "anticorpo")
 
 #Inicio da contagem do tempo
 tic = time.perf_counter()
@@ -211,8 +211,8 @@ for k in range(1,steps):
             microglia = mic_anterior[i][j]
             dc = dendritica_conv_anterior[i][j]
             da = dendritica_ativ_anterior[i][j]
-            anticorpo = anticorpo_anterior[i][j]
-            t_cito = t_cito_anterior[i][j]
+            # anticorpo = anticorpo_anterior[i][j]
+            # t_cito = t_cito_anterior[i][j]
             
             # condição de contorno de Neumman microglia
             mic_ipj = mic_anterior[i+1][j] if i != tam-1 else microglia - 2*h_x*bc_neumann_baixo
@@ -239,16 +239,16 @@ for k in range(1,steps):
             olide_ijm = olide_anterior[i][j-1] if j != 0 else oligo_destr
 
             # condição de contorno de Neumman t citotóxicas
-            t_cito_ipj = t_cito_anterior[i+1][j] if i != tam-1 else t_cito - 2*h_x*bc_neumann_baixo
-            t_cito_imj = t_cito_anterior[i-1][j] if i != 0 else t_cito - 2*h_x*bc_neumann_cima
-            t_cito_ijp = t_cito_anterior[i][j+1] if j != tam-1 else t_cito - 2*h_x*bc_neumann_direita
-            t_cito_ijm = t_cito_anterior[i][j-1] if j != 0 else t_cito - 2*h_x*bc_neumann_esquerda
+            # t_cito_ipj = t_cito_anterior[i+1][j] if i != tam-1 else t_cito - 2*h_x*bc_neumann_baixo
+            # t_cito_imj = t_cito_anterior[i-1][j] if i != 0 else t_cito - 2*h_x*bc_neumann_cima
+            # t_cito_ijp = t_cito_anterior[i][j+1] if j != tam-1 else t_cito - 2*h_x*bc_neumann_direita
+            # t_cito_ijm = t_cito_anterior[i][j-1] if j != 0 else t_cito - 2*h_x*bc_neumann_esquerda
 
             # condição de contorno de Neumman anticorpos
-            f_ipj = anticorpo_anterior[i+1][j] if i != tam-1 else anticorpo - 2*h_x*bc_neumann_baixo
-            f_imj = anticorpo_anterior[i-1][j] if i != 0 else anticorpo - 2*h_x*bc_neumann_cima
-            f_ijp = anticorpo_anterior[i][j+1] if j != tam-1 else anticorpo - 2*h_x*bc_neumann_direita
-            f_ijm = anticorpo_anterior[i][j-1] if j != 0 else anticorpo - 2*h_x*bc_neumann_esquerda            
+            # f_ipj = anticorpo_anterior[i+1][j] if i != tam-1 else anticorpo - 2*h_x*bc_neumann_baixo
+            # f_imj = anticorpo_anterior[i-1][j] if i != 0 else anticorpo - 2*h_x*bc_neumann_cima
+            # f_ijp = anticorpo_anterior[i][j+1] if j != tam-1 else anticorpo - 2*h_x*bc_neumann_direita
+            # f_ijm = anticorpo_anterior[i][j-1] if j != 0 else anticorpo - 2*h_x*bc_neumann_esquerda            
 
             #Dependendo do gradiente dos ODCs vou fazer upwind ou downwind no eixo i ou eixo j
 
@@ -260,19 +260,19 @@ for k in range(1,steps):
             if gradiente_odc_i > 0:
                 gradiente_m_i = gradiente(microglia, mic_imj, mic_media)/h_x
                 gradiente_dc_i = gradiente(dc, dc_imj,dc_media)/h_x
-                gradiente_t_i = gradiente(t_cito, t_cito_imj, parameters["t_cito_media"])/h_x
+                # gradiente_t_i = gradiente(t_cito, t_cito_imj, parameters["t_cito_media"])/h_x
             else:
                 gradiente_m_i = gradiente(mic_ipj, microglia, mic_media)/h_x
                 gradiente_dc_i = gradiente(dc_ipj, dc, dc_media)/h_x
-                gradiente_t_i = gradiente(t_cito_ipj, t_cito, parameters["t_cito_media"])/h_x
+                # gradiente_t_i = gradiente(t_cito_ipj, t_cito, parameters["t_cito_media"])/h_x
             if gradiente_odc_j > 0:
                 gradiente_m_j = gradiente(microglia, mic_ijm, mic_media)/h_x
                 gradiente_dc_j = gradiente(dc, dc_ijm, dc_media)/h_x
-                gradiente_t_j = gradiente(t_cito, t_cito_ijm, parameters["t_cito_media"])/h_x
+                # gradiente_t_j = gradiente(t_cito, t_cito_ijm, parameters["t_cito_media"])/h_x
             else:
                 gradiente_m_j = gradiente(mic_ijp, microglia, mic_media)/h_x
                 gradiente_dc_j = gradiente(dc_ijp, dc, dc_media)/h_x
-                gradiente_t_j = gradiente(t_cito_ijp, t_cito, parameters["t_cito_media"])/h_x
+                # gradiente_t_j = gradiente(t_cito_ijp, t_cito, parameters["t_cito_media"])/h_x
 
             #Dados da equacao microglia
             quimiotaxia_mic = parameters["chi"]*(gradiente_odc_i*gradiente_m_i + gradiente_odc_j*gradiente_m_j)
@@ -282,39 +282,49 @@ for k in range(1,steps):
             mic_atual[i][j] = microglia + h_t*(difusao_mic + reacao_mic - quimiotaxia_mic)
 
             #T citotóxica
-            quimiotaxia_t_cito = parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
-            difusao_t_cito = parameters["d_t_cit"]*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
-            migracao_t_cito = theta_BV[i][j]*parameters["gamma_T"]*(TL_c_atual - t_cito)
+            # quimiotaxia_t_cito = parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
+            # difusao_t_cito = parameters["d_t_cit"]*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
+            # migracao_t_cito = theta_BV[i][j]*parameters["gamma_T"]*(TL_c_atual - t_cito)
             
-            t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
+            # t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
 
             #Oligodendrocitos destruidos 
-            olide_atual[i][j] = oligo_destr + h_t*((parameters["r_m"] + parameters["lamb_f_m"]*anticorpo)*f_func(microglia, mic_media)*(parameters["odc_media"] - oligo_destr) + parameters["r_t"]*f_func(t_cito, parameters["t_cito_media"])*(parameters["odc_media"] - oligo_destr))
+            fag_mic_ant = 0# parameters["lamb_f_m"]*anticorpo
+            apoptose_tke = 0# parameters["r_t"]*f_func(t_cito, parameters["t_cito_media"])*(parameters["odc_media"] - oligo_destr)
+            olide_atual[i][j] = oligo_destr + h_t*((parameters["r_m"] + fag_mic_ant)*f_func(microglia, mic_media)*(parameters["odc_media"] - oligo_destr) + apoptose_tke)
 
             #Anticorpo
-            difusao_anticorpo = parameters["d_anti"]*(f_ipj + f_imj - 4*anticorpo + f_ijp + f_ijm)
-            reacao_anticorpo = -parameters["lamb_f_m"]*anticorpo*(parameters["odc_media"] - oligo_destr)*f_func(microglia, mic_media)
-            migracao_anticorpo = theta_BV[i][j]*parameters["gamma_F"]*(FL_atual - anticorpo)
+            # difusao_anticorpo = parameters["d_anti"]*(f_ipj + f_imj - 4*anticorpo + f_ijp + f_ijm)
+            # reacao_anticorpo = -parameters["lamb_f_m"]*anticorpo*(parameters["odc_media"] - oligo_destr)*f_func(microglia, mic_media)
+            # migracao_anticorpo = theta_BV[i][j]*parameters["gamma_F"]*(FL_atual - anticorpo)
 
-            anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo + reacao_anticorpo + migracao_anticorpo)
+            # anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo + reacao_anticorpo + migracao_anticorpo)
 
             #DC convencional
             quimiotaxia_dc = parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
             difusao_dc = parameters["d_dc"]*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
             reacao_dc = parameters["mu_dc"]*oligo_destr*(dc_media- dc)
+            ativacao_dc_da = 0 # parameters["b_d"]*oligo_destr*dc
 
-            dendritica_conv_atual[i][j] = dc + h_t*(reacao_dc + difusao_dc - quimiotaxia_dc - parameters["b_d"]*oligo_destr*dc)
+            dendritica_conv_atual[i][j] = dc + h_t*(reacao_dc + difusao_dc - quimiotaxia_dc - ativacao_dc_da)
             
             #DC ativada
-            difusao_da = parameters["d_da"]*(da_ipj + da_imj - 4*da + da_ijp + da_ijm )/h_x**2
+            difusao_da = parameters["d_da"]*(da_ipj + da_imj - 4*da + da_ijp + da_ijm)/h_x**2
+            migracao_da = 0 #theta_LV[i][j]*parameters["gamma_D"]*(DL_atual - da)
 
-            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + parameters["b_d"]*oligo_destr*dc + theta_LV[i][j]*parameters["gamma_D"]*(DL_atual - da))
+            # dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + ativacao_dc_da + migracao_da)
+            if microglia < 0:
+                print("Tempo do Erro: " + str(k*h_t) + " - Variavel microglia: " + str(microglia) + " - Tipo: " + str(type(microglia)))
+            if da < 0:
+                print("Tempo do Erro: " + str(k*h_t) + " - Variavel DA: " + str(da) + " - Tipo: " + str(type(da)))
+            if dc < 0:
+                print("Tempo do Erro: " + str(k*h_t) + " - Variavel dc: " + str(dc) + " - Tipo: " + str(type(dc)))
             
     olide_anterior = np.copy(olide_atual)
     dendritica_conv_anterior = np.copy(dendritica_conv_atual)
     dendritica_ativ_anterior = np.copy(dendritica_ativ_atual)
-    t_cito_anterior = np.copy(t_cito_atual)
-    anticorpo_anterior = np.copy(anticorpo_atual)
+    # t_cito_anterior = np.copy(t_cito_atual)
+    # anticorpo_anterior = np.copy(anticorpo_atual)
     mic_anterior = np.copy(mic_atual)
     
     #Atualização da concentração das populações que migram.
@@ -330,9 +340,10 @@ for k in range(1,steps):
             if theta_BV[i][j] == 1:
                 AnticorposTecido += anticorpo_anterior[i][j]
                 TcitotoxicaTecido += t_cito_anterior[i][j]
-    parameters[8] = TcitotoxicaTecido
-    parameters[19] = DendriticasTecido
-    parameters[20] = AnticorposTecido
+
+    parameters["TcitotoxicaTecido"] = TcitotoxicaTecido
+    parameters["DendriticasTecido"] = DendriticasTecido
+    parameters["AnticorposTecido"] = AnticorposTecido
 
     linfonodo_eqs = [DL_atual, TL_c_atual, TL_h_atual, B_atual, FL_atual]
     DL_vetor[k] = DL_atual
@@ -346,8 +357,8 @@ for k in range(1,steps):
         printMesh(k,mic_anterior, "microglia")
         printMesh(k,dendritica_conv_anterior, "dc")
         printMesh(k,dendritica_ativ_anterior, "da")
-        printMesh(k,t_cito_anterior, "tke")
-        printMesh(k,anticorpo_anterior, "anticorpo")
+        # printMesh(k,t_cito_anterior, "tke")
+        # printMesh(k,anticorpo_anterior, "anticorpo")
         print("Tempo: "+ str(k*h_t))
 
 #Fim da contagem do tempo
@@ -363,31 +374,31 @@ plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/dc_linfonodo.png', dpi = 300)
 plt.clf()
 
-plt.plot(t,TL_c_vetor)
-plt.title("T citotóxicas no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,TL_c_vetor)
+# plt.title("T citotóxicas no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,TL_h_vetor)
-plt.title("T helper no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,TL_h_vetor)
+# plt.title("T helper no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,B_vetor)
-plt.title("Células B no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,B_vetor)
+# plt.title("Células B no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,FL_vetor)
-plt.title("Anticorpos no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/anticorpo_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,FL_vetor)
+# plt.title("Anticorpos no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/anticorpo_linfonodo.png', dpi = 300)
+# plt.clf()
 
