@@ -1,4 +1,3 @@
-from turtle import ht
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
@@ -13,10 +12,11 @@ gradiente = lambda ponto_anterior, ponto_posterior, valor_maximo: quimiotaxia(po
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-T_final = 0.3 # 1# Dia
+
+T_final = 1# Dia
 h_t = 0.001
 
-L = 25.8  # Comprimento da malha
+L = 10  # Comprimento da malha
 h_x = 0.1
 
 t = np.linspace(0, T_final, int(T_final/h_t))
@@ -27,6 +27,11 @@ steps = len(t)
 num_figuras = 5
 intervalo_figs = int(steps/num_figuras)
 
+def verifica_cfl(difusao_mic, difusao_dc, difusao_da, quimiotaxia_dc, quimiotaxia_mic):
+    if(difusao_mic*h_t/h_x**2 < 1/4 and difusao_dc*h_t/h_x**2 < 1/4 and difusao_da*h_t/h_x**2 < 1/4 and quimiotaxia_dc*h_t/h_x < 1 and quimiotaxia_mic*h_t/h_x < 1):
+        return True
+    else:
+        return False
 
 V_BV = 0
 V_LV = 0
@@ -67,10 +72,12 @@ anticorpo_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Dendríticas convencionais
 dc_media = 5
-dendritica_conv_anterior = dc_media*np.ones((int(L/h_x), int(L/h_x)))
+dendritica_conv_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Dendríticas ativadas
 dendritica_ativ_anterior = np.zeros((int(L/h_x), int(L/h_x)))
+
+#***********************Declaracao das matrizes que vao guardar os valores do passo de tempo atual*********************
 
 mic_atual = np.zeros((int(L/h_x), int(L/h_x)))
 t_cito_atual = np.zeros((int(L/h_x), int(L/h_x)))
@@ -174,6 +181,9 @@ parameters = {
     "V_BV": V_BV,
     "V_LN": V_LN
 }
+if not verifica_cfl(parameters["D_mic"], parameters["d_dc"], parameters["d_da"], parameters["chi"], parameters["chi"]):
+    print("Falhou cfl!!!")
+    exit(1)
 
 #BC
 bc_neumann_cima = 0
@@ -303,8 +313,8 @@ for k in range(1,steps):
             #DC convencional
             quimiotaxia_dc = parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
             difusao_dc = parameters["d_dc"]*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
-            reacao_dc = parameters["mu_dc"]*oligo_destr*(dc_media- dc)
-            ativacao_dc_da = 0 # parameters["b_d"]*oligo_destr*dc
+            reacao_dc = parameters["mu_dc"]*oligo_destr*(dc_media - dc)
+            ativacao_dc_da = parameters["b_d"]*oligo_destr*dc
 
             dendritica_conv_atual[i][j] = dc + h_t*(reacao_dc + difusao_dc - quimiotaxia_dc - ativacao_dc_da)
             
@@ -312,13 +322,13 @@ for k in range(1,steps):
             difusao_da = parameters["d_da"]*(da_ipj + da_imj - 4*da + da_ijp + da_ijm)/h_x**2
             migracao_da = 0 #theta_LV[i][j]*parameters["gamma_D"]*(DL_atual - da)
 
-            # dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + ativacao_dc_da + migracao_da)
+            dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + ativacao_dc_da + migracao_da)
             if microglia < 0:
-                print("Tempo do Erro: " + str(k*h_t) + " - Variavel microglia: " + str(microglia) + " - Tipo: " + str(type(microglia)))
+                print("Tempo do Erro: " + str(k*h_t) + " - Variavel microglia: " + str(microglia))
             if da < 0:
-                print("Tempo do Erro: " + str(k*h_t) + " - Variavel DA: " + str(da) + " - Tipo: " + str(type(da)))
+                print("Tempo do Erro: " + str(k*h_t) + " - Variavel DA: " + str(da))
             if dc < 0:
-                print("Tempo do Erro: " + str(k*h_t) + " - Variavel dc: " + str(dc) + " - Tipo: " + str(type(dc)))
+                print("Tempo do Erro: " + str(k*h_t) + " - Variavel dc: " + str(dc))
             
     olide_anterior = np.copy(olide_atual)
     dendritica_conv_anterior = np.copy(dendritica_conv_atual)
@@ -363,6 +373,10 @@ for k in range(1,steps):
 
 #Fim da contagem do tempo
 toc = time.perf_counter()
+
+final_time = (toc - tic)*10**6
+
+print("Tempo de execução: " + str(final_time) + " s")
 
 #Transforma de dias para horas no plot
 t = np.multiply(t,24)
