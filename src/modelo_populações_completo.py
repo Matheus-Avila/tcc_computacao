@@ -108,7 +108,7 @@ for i in range(int(L/h_x)):
             AnticorposTecido += anticorpo_anterior[i][j]
             TcitotoxicaTecido += t_cito_anterior[i][j]
 
-#**********************Funcoes print dos resultados*************************
+#**********************Funcao print dos resultados*************************
 
 populationTitle = {
     "odc": "Oligodendrócitos destruídos",
@@ -147,7 +147,7 @@ parameters = {
     "d_t_cit": 60*24*6.6*10**-5, # difusao t citotóxica(procurar na literatura)
     "d_anti": 60*24*6.6*10**-5, # difusao anticorpo(procurar na literatura)
     "lamb_f_m": 60*24*3.96*10**-6, # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
-    "b_d": 0.0001, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
+    "b_d": 0.001, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
     "r_dc": 0.001, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
     "r_t": 0.1 , # agressividade de t citotoxica(procurar na literatura)
 
@@ -311,7 +311,7 @@ for k in range(1,steps):
             # anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo + reacao_anticorpo + migracao_anticorpo)
 
             #DC convencional
-            quimiotaxia_dc = parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
+            quimiotaxia_dc = 0# parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
             difusao_dc = parameters["d_dc"]*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
             reacao_dc = parameters["mu_dc"]*oligo_destr*(dc_media - dc)
             ativacao_dc_da = parameters["b_d"]*oligo_destr*dc
@@ -320,7 +320,7 @@ for k in range(1,steps):
             
             #DC ativada
             difusao_da = parameters["d_da"]*(da_ipj + da_imj - 4*da + da_ijp + da_ijm)/h_x**2
-            migracao_da = 0 #theta_LV[i][j]*parameters["gamma_D"]*(DL_atual - da)
+            migracao_da = theta_LV[i][j]*parameters["gamma_D"]*(DL_atual - da)
 
             dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + ativacao_dc_da + migracao_da)
             if microglia < 0:
@@ -374,9 +374,9 @@ for k in range(1,steps):
 #Fim da contagem do tempo
 toc = time.perf_counter()
 
-final_time = (toc - tic)*10**6
+final_time = (toc - tic)/60
 
-print("Tempo de execução: " + str(final_time) + " s")
+print("Tempo de execução: " + str(final_time) + " min")
 
 #Transforma de dias para horas no plot
 t = np.multiply(t,24)
