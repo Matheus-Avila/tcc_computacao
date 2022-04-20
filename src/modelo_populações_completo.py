@@ -207,7 +207,7 @@ printMesh(0,olide_anterior, "odc")
 printMesh(0,mic_anterior, "microglia")
 printMesh(0,dendritica_conv_anterior, "dc")
 printMesh(0,dendritica_ativ_anterior, "da")
-printMesh(0,t_cito_anterior, "tke")
+# printMesh(0,t_cito_anterior, "tke")
 # printMesh(0,anticorpo_anterior, "anticorpo")
 
 #Inicio da contagem do tempo
@@ -298,15 +298,15 @@ for k in range(1,steps):
             mic_atual[i][j] = microglia + h_t*(difusao_mic + reacao_mic - quimiotaxia_mic)
 
             #T citotóxica
-            quimiotaxia_t_cito = 0#parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
-            difusao_t_cito = parameters["d_t_cit"]*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
-            migracao_t_cito = theta_BV[i][j]*parameters["gamma_T"]*(TL_c_atual - t_cito)
+            # quimiotaxia_t_cito = 0#parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
+            # difusao_t_cito = parameters["d_t_cit"]*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
+            # migracao_t_cito = theta_BV[i][j]*parameters["gamma_T"]*(TL_c_atual - t_cito)
             
-            t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
+            # t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
 
             #Oligodendrocitos destruidos 
             fag_mic_ant = 0#parameters["lamb_f_m"]*anticorpo
-            apoptose_tke = parameters["r_t"]*f_func(t_cito, parameters["t_cito_media"])*(parameters["odc_media"] - oligo_destr)
+            apoptose_tke = 0#parameters["r_t"]*f_func(t_cito, parameters["t_cito_media"])*(parameters["odc_media"] - oligo_destr)
             olide_atual[i][j] = oligo_destr + h_t*((parameters["r_m"] + fag_mic_ant)*f_func(microglia, mic_media)*(parameters["odc_media"] - oligo_destr) + apoptose_tke)
 
             #Anticorpo
@@ -335,8 +335,8 @@ for k in range(1,steps):
                 print("Tempo do Erro: " + str(k*h_t) + " - Variavel DA: " + str(da))
             if dc < 0:
                 print("Tempo do Erro: " + str(k*h_t) + " - Variavel dc: " + str(dc))
-            if t_cito < 0:
-                print("Tempo do Erro: " + str(k*h_t) + " - Variavel t_cito: " + str(t_cito))
+            # if t_cito < 0:
+            #     print("Tempo do Erro: " + str(k*h_t) + " - Variavel t_cito: " + str(t_cito))
             # if anticorpo < 0:
             #     print("Tempo do Erro: " + str(k*h_t) + " - Variavel anticorpo: " + str(anticorpo))
             if oligo_destr < 0:
@@ -379,7 +379,7 @@ for k in range(1,steps):
         printMesh(k,mic_anterior, "microglia")
         printMesh(k,dendritica_conv_anterior, "dc")
         printMesh(k,dendritica_ativ_anterior, "da")
-        printMesh(k,t_cito_anterior, "tke")
+        # printMesh(k,t_cito_anterior, "tke")
         # printMesh(k,anticorpo_anterior, "anticorpo")
         print("Tempo: "+ str(k*h_t))
 
@@ -400,26 +400,26 @@ plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/dc_linfonodo.png', dpi = 300)
 plt.clf()
 
-plt.plot(t,TL_c_vetor)
-plt.title("T citotóxicas no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,TL_c_vetor)
+# plt.title("T citotóxicas no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,TL_h_vetor)
-plt.title("T helper no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,TL_h_vetor)
+# plt.title("T helper no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,B_vetor)
-plt.title("Células B no linfonodo")
-plt.xlabel("Tempo (horas)")
-plt.ylabel("Concentração (células/$mm^2$)")
-plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,B_vetor)
+# plt.title("Células B no linfonodo")
+# plt.xlabel("Tempo (horas)")
+# plt.ylabel("Concentração (células/$mm^2$)")
+# plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
+# plt.clf()
 
 # plt.plot(t,FL_vetor)
 # plt.title("Anticorpos no linfonodo")
