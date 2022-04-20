@@ -298,7 +298,7 @@ for k in range(1,steps):
             mic_atual[i][j] = microglia + h_t*(difusao_mic + reacao_mic - quimiotaxia_mic)
 
             #T citotóxica
-            quimiotaxia_t_cito = 0#parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
+            quimiotaxia_t_cito = parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
             difusao_t_cito = parameters["d_t_cit"]*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
             migracao_t_cito = theta_BV[i][j]*parameters["gamma_T"]*(TL_c_atual - t_cito)
             
