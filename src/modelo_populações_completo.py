@@ -291,7 +291,7 @@ for k in range(1,steps):
                 gradiente_t_j = gradiente(t_cito_ijp, t_cito, parameters["t_cito_media"])/h_x
 
             #Dados da equacao microglia
-            quimiotaxia_mic = parameters["chi"]*(gradiente_odc_i*gradiente_m_i + gradiente_odc_j*gradiente_m_j)
+            quimiotaxia_mic = 0#parameters["chi"]*(gradiente_odc_i*gradiente_m_i + gradiente_odc_j*gradiente_m_j)
             difusao_mic = parameters["D_mic"]*(mic_ipj + mic_imj - 4*microglia + mic_ijp + mic_ijm )/h_x**2
             reacao_mic = parameters["mu_m"]*microglia*(parameters["mic_media"] - microglia)
             
@@ -317,7 +317,7 @@ for k in range(1,steps):
             anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo - reacao_anticorpo + migracao_anticorpo)
 
             #DC convencional
-            quimiotaxia_dc = parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
+            quimiotaxia_dc = 0#parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
             difusao_dc = parameters["d_dc"]*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
             reacao_dc = parameters["mu_dc"]*oligo_destr*(parameters["dc_media"] - dc)
             ativacao_dc_da = parameters["b_d"]*oligo_destr*dc
