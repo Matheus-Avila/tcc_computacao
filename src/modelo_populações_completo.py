@@ -8,12 +8,11 @@ from linfonodo import diferential
 sns.set()
 os.system("python3 ../criaDiretorios.py")
 
-gradiente = lambda ponto_anterior, ponto_posterior, valor_maximo: quimiotaxia(ponto_posterior, valor_maximo) - quimiotaxia(ponto_anterior, valor_maximo)
+gradiente = lambda ponto_posterior, ponto_anterior, valor_maximo: quimiotaxia(ponto_posterior, valor_maximo) - quimiotaxia(ponto_anterior, valor_maximo)
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-
-T_final = 1# Dia
+T_final = 7# Dia
 h_t = 0.001
 
 L = 10  # Comprimento da malha
@@ -51,6 +50,48 @@ for i in range(int(L/h_x)):
             V_BV += 1
 
 V_LN = 160
+
+def checkBVeLV():
+    x_pts, y_pts = np.meshgrid(x, x)
+    max_population = np.max(theta_LV)
+    if max_population == 0:
+        max_population += 1
+    levels = np.linspace(0, max_population, 10)
+
+    cp = plt.contourf(x_pts, y_pts,theta_LV, levels=levels)
+    plt.title("theta_LV")
+    plt.xlabel("Milímetros")
+    plt.ylabel("Milímetros")
+    plt.colorbar(cp, label="Concentração (células/$mm^2$)")
+    plt.show()
+    plt.clf()
+
+    cp = plt.contourf(x_pts, y_pts,theta_BV, levels=levels)
+    plt.title("theta_BV")
+    plt.xlabel("Milímetros")
+    plt.ylabel("Milímetros")
+    plt.colorbar(cp, label="Concentração (células/$mm^2$)")
+    plt.show()
+    plt.clf()
+
+# checkBVeLV()
+
+def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual, valor_medio, gradiente_odc_i, gradiente_odc_j):
+    gradiente_pop_i = 0
+    gradiente_pop_j = 0
+    if gradiente_odc_i < 0:
+        gradiente_pop_i = gradiente(ponto_posterior_i, ponto_atual, valor_medio)#/d_x
+    else:
+        gradiente_pop_i = gradiente(ponto_atual, ponto_anterior_i, valor_medio)#/d_x
+    if gradiente_odc_j < 0:
+        gradiente_pop_j = gradiente(ponto_posterior_j, ponto_atual, valor_medio)#/d_x
+    else:
+        gradiente_pop_j = gradiente(ponto_atual, ponto_anterior_j, valor_medio)#/d_x
+    
+    return gradiente_pop_i*gradiente_odc_i + gradiente_pop_j*gradiente_odc_j
+
+def calculaDifusao(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual):
+    return (ponto_anterior_i + ponto_anterior_j + ponto_posterior_i + ponto_posterior_j - 4*ponto_atual)/(h_x**2)
 
 # IC
 # microglia
@@ -151,7 +192,7 @@ parameters = {
     "r_dc": 0.001, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
     "r_t": 0.1 , # agressividade de t citotoxica(procurar na literatura)
 
-    "mu_dc": 60*24*3*10**-6, #Taxa de producao de células dendríticas (procurar na literatura)
+    "mu_dc": 60*24*3*10**-4, #Taxa de producao de células dendríticas (procurar na literatura)
     "gamma_D": 0.001, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
     "gamma_F": 0.0003, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
     "gamma_T": 0.2, #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
@@ -231,101 +272,85 @@ for k in range(1,steps):
             t_cito = t_cito_anterior[i][j]
             
             # condição de contorno de Neumman microglia
-            mic_ipj = mic_anterior[i+1][j] if i != tam-1 else microglia - 2*h_x*bc_neumann_baixo
-            mic_imj = mic_anterior[i-1][j] if i != 0 else microglia - 2*h_x*bc_neumann_cima
-            mic_ijp = mic_anterior[i][j+1] if j != tam-1 else microglia - 2*h_x*bc_neumann_direita
-            mic_ijm = mic_anterior[i][j-1] if j != 0 else microglia - 2*h_x*bc_neumann_esquerda
+            mic_iposterior = mic_anterior[i+1][j] if i != tam-1 else microglia - 2*h_x*bc_neumann_baixo
+            mic_ianterior = mic_anterior[i-1][j] if i != 0 else microglia - 2*h_x*bc_neumann_cima
+            mic_jposterior = mic_anterior[i][j+1] if j != tam-1 else microglia - 2*h_x*bc_neumann_direita
+            mic_janterior = mic_anterior[i][j-1] if j != 0 else microglia - 2*h_x*bc_neumann_esquerda
 
             # condição de contorno de Neumman dc convencional
-            dc_ipj = dendritica_conv_anterior[i+1][j] if i != tam-1 else dc - 2*h_x*bc_neumann_baixo
-            dc_imj = dendritica_conv_anterior[i-1][j] if i != 0 else dc - 2*h_x*bc_neumann_cima
-            dc_ijp = dendritica_conv_anterior[i][j+1] if j != tam-1 else dc - 2*h_x*bc_neumann_direita
-            dc_ijm = dendritica_conv_anterior[i][j-1] if j != 0 else dc - 2*h_x*bc_neumann_esquerda
+            dc_iposterior = dendritica_conv_anterior[i+1][j] if i != tam-1 else dc - 2*h_x*bc_neumann_baixo
+            dc_ianterior = dendritica_conv_anterior[i-1][j] if i != 0 else dc - 2*h_x*bc_neumann_cima
+            dc_jposterior = dendritica_conv_anterior[i][j+1] if j != tam-1 else dc - 2*h_x*bc_neumann_direita
+            dc_janterior = dendritica_conv_anterior[i][j-1] if j != 0 else dc - 2*h_x*bc_neumann_esquerda
 
             # condição de contorno de Neumman de ativadas
-            da_ipj = dendritica_ativ_anterior[i+1][j] if i != tam-1 else da - 2*h_x*bc_neumann_baixo
-            da_imj = dendritica_ativ_anterior[i-1][j] if i != 0 else da - 2*h_x*bc_neumann_cima
-            da_ijp = dendritica_ativ_anterior[i][j+1] if j != tam-1 else da - 2*h_x*bc_neumann_direita
-            da_ijm = dendritica_ativ_anterior[i][j-1] if j != 0 else da - 2*h_x*bc_neumann_esquerda
+            da_iposterior = dendritica_ativ_anterior[i+1][j] if i != tam-1 else da - 2*h_x*bc_neumann_baixo
+            da_ianterior = dendritica_ativ_anterior[i-1][j] if i != 0 else da - 2*h_x*bc_neumann_cima
+            da_jposterior = dendritica_ativ_anterior[i][j+1] if j != tam-1 else da - 2*h_x*bc_neumann_direita
+            da_janterior = dendritica_ativ_anterior[i][j-1] if j != 0 else da - 2*h_x*bc_neumann_esquerda
             
             # ponto fantasma oligodendrocitos destruidos ODC Nao é contorno
-            olide_ipj = olide_anterior[i+1][j] if i != tam-1 else oligo_destr
-            olide_imj = olide_anterior[i-1][j] if i != 0 else oligo_destr
-            olide_ijp = olide_anterior[i][j+1] if j != tam-1 else oligo_destr
-            olide_ijm = olide_anterior[i][j-1] if j != 0 else oligo_destr
+            olide_iposterior = olide_anterior[i+1][j] if i != tam-1 else oligo_destr
+            olide_ianterior = olide_anterior[i-1][j] if i != 0 else oligo_destr
+            olide_jposterior = olide_anterior[i][j+1] if j != tam-1 else oligo_destr
+            olide_janterior = olide_anterior[i][j-1] if j != 0 else oligo_destr
 
             # condição de contorno de Neumman t citotóxicas
-            t_cito_ipj = t_cito_anterior[i+1][j] if i != tam-1 else t_cito - 2*h_x*bc_neumann_baixo
-            t_cito_imj = t_cito_anterior[i-1][j] if i != 0 else t_cito - 2*h_x*bc_neumann_cima
-            t_cito_ijp = t_cito_anterior[i][j+1] if j != tam-1 else t_cito - 2*h_x*bc_neumann_direita
-            t_cito_ijm = t_cito_anterior[i][j-1] if j != 0 else t_cito - 2*h_x*bc_neumann_esquerda
+            t_cito_iposterior = t_cito_anterior[i+1][j] if i != tam-1 else t_cito - 2*h_x*bc_neumann_baixo
+            t_cito_ianterior = t_cito_anterior[i-1][j] if i != 0 else t_cito - 2*h_x*bc_neumann_cima
+            t_cito_jposterior = t_cito_anterior[i][j+1] if j != tam-1 else t_cito - 2*h_x*bc_neumann_direita
+            t_cito_janterior = t_cito_anterior[i][j-1] if j != 0 else t_cito - 2*h_x*bc_neumann_esquerda
 
             # condição de contorno de Neumman anticorpos
-            f_ipj = anticorpo_anterior[i+1][j] if i != tam-1 else anticorpo - 2*h_x*bc_neumann_baixo
-            f_imj = anticorpo_anterior[i-1][j] if i != 0 else anticorpo - 2*h_x*bc_neumann_cima
-            f_ijp = anticorpo_anterior[i][j+1] if j != tam-1 else anticorpo - 2*h_x*bc_neumann_direita
-            f_ijm = anticorpo_anterior[i][j-1] if j != 0 else anticorpo - 2*h_x*bc_neumann_esquerda            
+            f_iposterior = anticorpo_anterior[i+1][j] if i != tam-1 else anticorpo - 2*h_x*bc_neumann_baixo
+            f_ianterior = anticorpo_anterior[i-1][j] if i != 0 else anticorpo - 2*h_x*bc_neumann_cima
+            f_jposterior = anticorpo_anterior[i][j+1] if j != tam-1 else anticorpo - 2*h_x*bc_neumann_direita
+            f_janterior = anticorpo_anterior[i][j-1] if j != 0 else anticorpo - 2*h_x*bc_neumann_esquerda            
 
             #Dependendo do gradiente dos ODCs vou fazer upwind ou downwind no eixo i ou eixo j
 
             #Decidindo qual combinacao usar no gradiente das células com quimiotaxia
             
-            gradiente_odc_i = (olide_ipj - olide_imj)/(2*h_x)
-            gradiente_odc_j = (olide_ijp - olide_ijm)/(2*h_x)
-
-            if gradiente_odc_i > 0:
-                gradiente_m_i = gradiente(microglia, mic_imj, parameters["mic_media"])/h_x
-                gradiente_dc_i = gradiente(dc, dc_imj,parameters["dc_media"])/h_x
-                gradiente_t_i = gradiente(t_cito, t_cito_imj, parameters["t_cito_media"])/h_x
-            else:
-                gradiente_m_i = gradiente(mic_ipj, microglia, parameters["mic_media"])/h_x
-                gradiente_dc_i = gradiente(dc_ipj, dc, parameters["dc_media"])/h_x
-                gradiente_t_i = gradiente(t_cito_ipj, t_cito, parameters["t_cito_media"])/h_x
-            if gradiente_odc_j > 0:
-                gradiente_m_j = gradiente(microglia, mic_ijm, parameters["mic_media"])/h_x
-                gradiente_dc_j = gradiente(dc, dc_ijm, parameters["dc_media"])/h_x
-                gradiente_t_j = gradiente(t_cito, t_cito_ijm, parameters["t_cito_media"])/h_x
-            else:
-                gradiente_m_j = gradiente(mic_ijp, microglia, parameters["mic_media"])/h_x
-                gradiente_dc_j = gradiente(dc_ijp, dc, parameters["dc_media"])/h_x
-                gradiente_t_j = gradiente(t_cito_ijp, t_cito, parameters["t_cito_media"])/h_x
+            gradiente_odc_i = (olide_iposterior - olide_ianterior)/(2*h_x)
+            gradiente_odc_j = (olide_jposterior - olide_janterior)/(2*h_x)
 
             #Dados da equacao microglia
-            quimiotaxia_mic = 0#parameters["chi"]*(gradiente_odc_i*gradiente_m_i + gradiente_odc_j*gradiente_m_j)
-            difusao_mic = parameters["D_mic"]*(mic_ipj + mic_imj - 4*microglia + mic_ijp + mic_ijm )/h_x**2
+            quimiotaxia_mic = parameters["chi"]*calculaQuimiotaxia(mic_jposterior, mic_janterior, mic_iposterior, mic_ianterior, microglia, parameters["mic_media"], gradiente_odc_i, gradiente_odc_j)
+            difusao_mic = parameters["D_mic"]*calculaDifusao(mic_jposterior, mic_janterior, mic_iposterior, mic_ianterior, microglia)
             reacao_mic = parameters["mu_m"]*microglia*(parameters["mic_media"] - microglia)
             
             mic_atual[i][j] = microglia + h_t*(difusao_mic + reacao_mic - quimiotaxia_mic)
 
             #T citotóxica
-            quimiotaxia_t_cito = 0#parameters["chi"]*(gradiente_odc_i*gradiente_t_i + gradiente_odc_j*gradiente_t_j)
-            difusao_t_cito = parameters["d_t_cit"]*(t_cito_ijm + t_cito_ijp - 4*t_cito + t_cito_imj + t_cito_ipj)/h_x**2
+            quimiotaxia_t_cito = parameters["chi"]*calculaQuimiotaxia(t_cito_jposterior, t_cito_janterior, t_cito_iposterior, t_cito_ianterior, t_cito, parameters["t_cito_media"], gradiente_odc_i, gradiente_odc_j)
+            difusao_t_cito = parameters["d_t_cit"]*calculaDifusao(t_cito_jposterior, t_cito_janterior, t_cito_iposterior, t_cito_ianterior, t_cito)
             migracao_t_cito = theta_BV[i][j]*parameters["gamma_T"]*(TL_c_atual - t_cito)
             
             t_cito_atual[i][j] = t_cito + h_t*(difusao_t_cito - quimiotaxia_t_cito + migracao_t_cito)
 
             #Oligodendrocitos destruidos 
-            fag_mic_ant = parameters["lamb_f_m"]*anticorpo
+            fag_mic_ant = parameters["lamb_f_m"]*anticorpo*f_func(microglia, mic_media)*(parameters["odc_media"] - oligo_destr)
             apoptose_tke = parameters["r_t"]*f_func(t_cito, parameters["t_cito_media"])*(parameters["odc_media"] - oligo_destr)
-            olide_atual[i][j] = oligo_destr + h_t*((parameters["r_m"] + fag_mic_ant)*f_func(microglia, mic_media)*(parameters["odc_media"] - oligo_destr) + apoptose_tke)
+
+            olide_atual[i][j] = oligo_destr + h_t*(parameters["r_m"]*f_func(microglia, mic_media)*(parameters["odc_media"] - oligo_destr) + fag_mic_ant + apoptose_tke)
 
             #Anticorpo
-            difusao_anticorpo = parameters["d_anti"]*(f_ipj + f_imj - 4*anticorpo + f_ijp + f_ijm)
-            reacao_anticorpo = parameters["lamb_f_m"]*anticorpo*(parameters["odc_media"] - oligo_destr)*f_func(microglia, mic_media)
+            difusao_anticorpo = parameters["d_anti"]*calculaDifusao(f_jposterior, f_janterior, f_iposterior, f_ianterior, anticorpo)
+            reacao_anticorpo = fag_mic_ant #Mesmo termo que soma na equacao das ODCs
             migracao_anticorpo = theta_BV[i][j]*parameters["gamma_F"]*(FL_atual - anticorpo)
 
             anticorpo_atual[i][j] = anticorpo + h_t*(difusao_anticorpo - reacao_anticorpo + migracao_anticorpo)
 
             #DC convencional
-            quimiotaxia_dc = 0#parameters["chi"]*(gradiente_odc_i*gradiente_dc_i + gradiente_odc_j*gradiente_dc_j)
-            difusao_dc = parameters["d_dc"]*(dc_ipj + dc_imj - 4*dc + dc_ijp + dc_ijm )/h_x**2
+            quimiotaxia_dc = parameters["chi"]*calculaQuimiotaxia(dc_jposterior, dc_janterior, dc_iposterior, dc_ianterior, dc, parameters["dc_media"], gradiente_odc_i, gradiente_odc_j)
+            difusao_dc = parameters["d_dc"]*calculaDifusao(dc_jposterior, dc_janterior, dc_iposterior, dc_ianterior, dc)
             reacao_dc = parameters["mu_dc"]*oligo_destr*(parameters["dc_media"] - dc)
             ativacao_dc_da = parameters["b_d"]*oligo_destr*dc
 
             dendritica_conv_atual[i][j] = dc + h_t*(reacao_dc + difusao_dc - quimiotaxia_dc - ativacao_dc_da)
             
             #DA ativada
-            difusao_da = parameters["d_da"]*(da_ipj + da_imj - 4*da + da_ijp + da_ijm)/h_x**2
+            difusao_da = parameters["d_da"]*calculaDifusao(da_jposterior, da_janterior, da_iposterior, da_ianterior, da)
             migracao_da = theta_LV[i][j]*parameters["gamma_D"]*(DL_atual - da)
 
             dendritica_ativ_atual[i][j] = da + h_t*(difusao_da + ativacao_dc_da + migracao_da)
