@@ -80,13 +80,13 @@ def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, p
     gradiente_pop_i = 0
     gradiente_pop_j = 0
     if gradiente_odc_i < 0:
-        gradiente_pop_i = gradiente(ponto_posterior_i, ponto_atual, valor_medio)#/d_x
+        gradiente_pop_i = gradiente(ponto_posterior_i, ponto_atual, valor_medio)/h_x
     else:
-        gradiente_pop_i = gradiente(ponto_atual, ponto_anterior_i, valor_medio)#/d_x
+        gradiente_pop_i = gradiente(ponto_atual, ponto_anterior_i, valor_medio)/h_x
     if gradiente_odc_j < 0:
-        gradiente_pop_j = gradiente(ponto_posterior_j, ponto_atual, valor_medio)#/d_x
+        gradiente_pop_j = gradiente(ponto_posterior_j, ponto_atual, valor_medio)/h_x
     else:
-        gradiente_pop_j = gradiente(ponto_atual, ponto_anterior_j, valor_medio)#/d_x
+        gradiente_pop_j = gradiente(ponto_atual, ponto_anterior_j, valor_medio)/h_x
     
     return gradiente_pop_i*gradiente_odc_i + gradiente_pop_j*gradiente_odc_j
 
@@ -311,8 +311,8 @@ for k in range(1,steps):
 
             #Decidindo qual combinacao usar no gradiente das células com quimiotaxia
             
-            gradiente_odc_i = (olide_iposterior - olide_ianterior)/(2*h_x)
-            gradiente_odc_j = (olide_jposterior - olide_janterior)/(2*h_x)
+            gradiente_odc_i = (olide_iposterior - olide_ianterior)/(2)
+            gradiente_odc_j = (olide_jposterior - olide_janterior)/(2)
 
             #Dados da equacao microglia
             quimiotaxia_mic = parameters["chi"]*calculaQuimiotaxia(mic_jposterior, mic_janterior, mic_iposterior, mic_ianterior, microglia, parameters["mic_media"], gradiente_odc_i, gradiente_odc_j)
