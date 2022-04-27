@@ -13,7 +13,7 @@ quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + pont
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
 T_final = 7# Dia
-h_t = 0.001
+h_t = 0.0002
 
 L = 10  # Comprimento da malha
 h_x = 0.1
@@ -178,7 +178,7 @@ def printMesh(time, population, type):
 
 
 parameters = {
-    "chi": 0.298*60*2 , # Quimioatracao(a mesma para todas as celulas por enquanto). valor por Dia
+    "chi": 0.298*60*24, # Quimioatracao. valor por Dia
     "D_mic": 60*24*6.6*10**-5, # Difusao da microglia. valor por Dia
     "mu_m": 60*24*3*10**-6, # Taxa de ativação da microglia. valor por Dia
     "r_m": 60*24*3.96*10**-6, # intensidade dos danos causados pela microglia valor por Dia
