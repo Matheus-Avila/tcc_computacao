@@ -13,7 +13,7 @@ quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + pont
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
 T_final = 7# Dia
-h_t = 0.0002
+h_t = 0.00001
 
 L = 10  # Comprimento da malha
 h_x = 0.1
@@ -311,8 +311,8 @@ for k in range(1,steps):
 
             #Decidindo qual combinacao usar no gradiente das células com quimiotaxia
             
-            gradiente_odc_i = (olide_iposterior - olide_ianterior)/(2)
-            gradiente_odc_j = (olide_jposterior - olide_janterior)/(2)
+            gradiente_odc_i = (olide_iposterior - olide_ianterior)/(2*h_x)
+            gradiente_odc_j = (olide_jposterior - olide_janterior)/(2*h_x)
 
             #Dados da equacao microglia
             quimiotaxia_mic = parameters["chi"]*calculaQuimiotaxia(mic_jposterior, mic_janterior, mic_iposterior, mic_ianterior, microglia, parameters["mic_media"], gradiente_odc_i, gradiente_odc_j)
