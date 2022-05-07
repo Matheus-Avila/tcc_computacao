@@ -13,9 +13,9 @@ quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + pont
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
 T_final = 7# Dia
-h_t = 0.00001
+h_t = 0.0002
 
-L = 10  # Comprimento da malha
+L = 25  # Comprimento da malha
 h_x = 0.1
 
 t = np.linspace(0, T_final, int(T_final/h_t))
@@ -40,22 +40,20 @@ for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if i > L/h_x*.9 and j > L/h_x*.9:
             theta_BV[i][j] = 1
-            V_LV += 1
+            V_BV += 1
 
 theta_LV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
-        if i < L/h_x*.5 and j < L/h_x*.5:
+        if i >= L/h_x*.3 and i < L/h_x*.4 and j >= L/h_x*.3 and j < L/h_x*.4:
             theta_LV[i][j] = 1
-            V_BV += 1
+            V_LV += 1
 
 V_LN = 160
 
 def checkBVeLV():
     x_pts, y_pts = np.meshgrid(x, x)
-    max_population = np.max(theta_LV)
-    if max_population == 0:
-        max_population += 1
+    max_population = 1
     levels = np.linspace(0, max_population, 10)
 
     cp = plt.contourf(x_pts, y_pts,theta_LV, levels=levels)
@@ -166,7 +164,7 @@ def printMesh(time, population, type):
     max_population = np.max(population)
     if max_population == 0:
         max_population += 1
-    levels = np.linspace(0, max_population, 10)
+    levels = np.linspace(0, max_population, 50)
 
     cp = plt.contourf(x_pts, y_pts,population, levels=levels)
     plt.title(populationTitle[type])
@@ -178,7 +176,7 @@ def printMesh(time, population, type):
 
 
 parameters = {
-    "chi": 0.298*60*24, # Quimioatracao. valor por Dia
+    "chi": 0.298*60*2, # Quimioatracao. valor por Dia
     "D_mic": 60*24*6.6*10**-5, # Difusao da microglia. valor por Dia
     "mu_m": 60*24*3*10**-6, # Taxa de ativação da microglia. valor por Dia
     "r_m": 60*24*3.96*10**-6, # intensidade dos danos causados pela microglia valor por Dia
@@ -207,9 +205,11 @@ parameters = {
     "alpha_T_c": 0.5,
     "alpha_B": 1,
     "b_T": 0.017,
+    "b_Tc": 0.005,
     "b_rho": 10**5,
     "b_rho_b": 6.02*10**3,
     "rho_T": 2,
+    "rho_Tc": 2,
     "rho_B": 16,
     "rho_F": 5.1*10**4,
     "estable_T_h": 8.4*10**-3,

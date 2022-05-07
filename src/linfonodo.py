@@ -1,13 +1,13 @@
 import numpy as np
 
 def diferential(y, parameters):
-    # When working with only one diferential function there must be created a null extra position
+    
     dy = np.zeros(5)
 
     # Dendritic cells
     dy[0] = parameters["gamma_D"] * (parameters["DendriticasTecido"] - y[0]) * (parameters["V_LV"] / parameters["V_LN"])
     # Cytotoxic T cells
-    dy[1] = parameters["alpha_T_c"] * (parameters["estable_T_c"] - y[1]) - (parameters["gamma_T"] * (y[1] - parameters["TcitotoxicaTecido"])) * (parameters["V_BV"] / parameters["V_LN"])
+    dy[1] = parameters["b_Tc"]*(parameters["rho_Tc"] * y[1] * y[0] - y[1]*y[0]) + parameters["alpha_T_c"] * (parameters["estable_T_c"] - y[1]) - (parameters["gamma_T"] * (y[1] - parameters["TcitotoxicaTecido"])) * (parameters["V_BV"] / parameters["V_LN"])
     # # Helper T cells
     dy[2] = parameters["b_T"]*(parameters["rho_T"] * y[2] * y[0] - y[2]*y[0]) - (parameters["b_rho"] * y[2] * y[0] * y[3]) + parameters["alpha_T_h"] * (parameters["estable_T_h"] - y[2])
     # # B cells
