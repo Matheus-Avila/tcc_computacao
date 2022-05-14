@@ -12,18 +12,18 @@ gradiente = lambda ponto_posterior, ponto_anterior, valor_maximo: quimiotaxia(po
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-T_final = 7# Dia
+T_final = 7*4# Dia
 h_t = 0.0002
 
-L = 25  # Comprimento da malha
-h_x = 0.1
+L = 10  # Comprimento da malha
+h_x = 0.5
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
-num_figuras = 5
+num_figuras = T_final
 intervalo_figs = int(steps/num_figuras)
 
 def verifica_cfl(difusao_mic, difusao_dc, difusao_da, quimiotaxia_dc, quimiotaxia_mic):
@@ -35,19 +35,19 @@ def verifica_cfl(difusao_mic, difusao_dc, difusao_da, quimiotaxia_dc, quimiotaxi
 V_BV = 0
 V_LV = 0
 
-theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
-for i in range(int(L/h_x)):
-    for j in range(int(L/h_x)):
-        if i > L/h_x*.9 and j > L/h_x*.9:
-            theta_BV[i][j] = 1
-            V_BV += 1
-
 theta_LV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
-        if i >= L/h_x*.3 and i < L/h_x*.4 and j >= L/h_x*.3 and j < L/h_x*.4:
+        if (i == L/h_x - 1 and j == L/(h_x*2)) or (i == 0 and j == L/(h_x*2)) or (i == L/(h_x*2) and j == 0) or (i == L/(h_x*2) and j == L/h_x - 1) or (i == int(L/h_x)/2 and j == int(L/h_x)/2):
             theta_LV[i][j] = 1
             V_LV += 1
+
+theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
+for i in range(int(L/h_x)):
+    for j in range(int(L/h_x)):
+        if (i == L/h_x - 1 and j == L/h_x - 1) or (i == 0 and j == L/h_x - 1) or (i == L/h_x - 1 and j == 0) or (i == 0 and j == 0):
+            theta_BV[i][j] = 1
+            V_BV += 1
 
 V_LN = 160
 
@@ -60,7 +60,7 @@ def checkBVeLV():
     plt.title("theta_LV")
     plt.xlabel("Milímetros")
     plt.ylabel("Milímetros")
-    plt.colorbar(cp, label="Concentração (células/$mm^2$)")
+    plt.colorbar(cp, label="Regiao perivascular")
     plt.show()
     plt.clf()
 
@@ -68,7 +68,7 @@ def checkBVeLV():
     plt.title("theta_BV")
     plt.xlabel("Milímetros")
     plt.ylabel("Milímetros")
-    plt.colorbar(cp, label="Concentração (células/$mm^2$)")
+    plt.colorbar(cp, label="Vasos sanguineos")
     plt.show()
     plt.clf()
 
@@ -98,7 +98,7 @@ mic_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
-        if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 20:
+        if (i-int(L/h_x)/2)**2 + (j-int(L/h_x)/2)**2 < 20/(2.5**2):
             mic_anterior[i][j] = mic_media/3.0
 
 # T citotóxica
@@ -174,17 +174,18 @@ def printMesh(time, population, type):
     plt.savefig('../results/'+type+'/fig'+'{:.4f}'.format(time*h_t)+'.png', dpi = 300)
     plt.clf()
 
+d_mic = (60*24*6.6/(2.5**2))*10**-5 # É para dividir ou multiplicar por 2.5 para fazer a malha de tamanho 10 representar 25 mm?
 
 parameters = {
-    "chi": 0.298*60*2, # Quimioatracao. valor por Dia
-    "D_mic": 60*24*6.6*10**-5, # Difusao da microglia. valor por Dia
+    "chi": 0.298*60*2/(2.5**2), # Quimioatracao. valor por Dia
+    "D_mic": d_mic, # Difusao da microglia. valor por Dia
     "mu_m": 60*24*3*10**-6, # Taxa de ativação da microglia. valor por Dia
     "r_m": 60*24*3.96*10**-6, # intensidade dos danos causados pela microglia valor por Dia
 
-    "d_dc": 60*24*6.6*10**-5, # difusao DC convencional(procurar na literatura)
-    "d_da": 60*24*6.6*10**-5, # difusao DC ativada(procurar na literatura)
-    "d_t_cit": 60*24*6.6*10**-5, # difusao t citotóxica(procurar na literatura)
-    "d_anti": 60*24*6.6*10**-5, # difusao anticorpo(procurar na literatura)
+    "d_dc": d_mic, # difusao DC convencional(procurar na literatura)
+    "d_da": d_mic, # difusao DC ativada(procurar na literatura)
+    "d_t_cit": d_mic, # difusao t citotóxica(procurar na literatura)
+    "d_anti": d_mic, # difusao anticorpo(procurar na literatura)
     "lamb_f_m": 60*24*3.96*10**-6, # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
     "b_d": 0.001, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
     "r_dc": 0.001, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
@@ -416,39 +417,39 @@ final_time = (toc - tic)/60
 print("Tempo de execução: " + str(final_time) + " min")
 
 #Transforma de dias para horas no plot
-t = np.multiply(t,24)
+# t = np.multiply(t,24)
 
 plt.plot(t,DL_vetor)
 plt.title("Dendríticas ativadas no linfonodo")
-plt.xlabel("Tempo (horas)")
+plt.xlabel("Tempo (dias)")
 plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/dc_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,TL_c_vetor)
 plt.title("T citotóxicas no linfonodo")
-plt.xlabel("Tempo (horas)")
+plt.xlabel("Tempo (dias)")
 plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,TL_h_vetor)
 plt.title("T helper no linfonodo")
-plt.xlabel("Tempo (horas)")
+plt.xlabel("Tempo (dias)")
 plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,B_vetor)
 plt.title("Células B no linfonodo")
-plt.xlabel("Tempo (horas)")
+plt.xlabel("Tempo (dias)")
 plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,FL_vetor)
 plt.title("Anticorpos no linfonodo")
-plt.xlabel("Tempo (horas)")
+plt.xlabel("Tempo (dias)")
 plt.ylabel("Concentração (células/$mm^2$)")
 plt.savefig('../results/anticorpo_linfonodo.png', dpi = 300)
 plt.clf()
