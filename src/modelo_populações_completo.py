@@ -16,7 +16,7 @@ T_final = 7*4# Dia
 h_t = 0.0002
 
 L = 10  # Comprimento da malha
-h_x = 0.5
+h_x = 0.2
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
@@ -110,7 +110,7 @@ olide_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 anticorpo_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Dendríticas convencionais
-dc_media = 5
+dc_media = 39 #Valeria testa
 dendritica_conv_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Dendríticas ativadas
