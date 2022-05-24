@@ -16,7 +16,7 @@ T_final = 7*4# Dia
 h_t = 0.0002
 
 L = 10  # Comprimento da malha
-h_x = 0.2
+h_x = 0.5
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
@@ -72,7 +72,7 @@ def checkBVeLV():
     plt.show()
     plt.clf()
 
-# checkBVeLV()
+checkBVeLV()
 
 def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual, valor_medio, gradiente_odc_i, gradiente_odc_j):
     gradiente_pop_i = 0
@@ -110,7 +110,7 @@ olide_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 anticorpo_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Dendríticas convencionais
-dc_media = 39 #Valeria testa
+dc_media = 33 #Valeria testa
 dendritica_conv_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Dendríticas ativadas
@@ -126,11 +126,13 @@ dendritica_conv_atual = np.zeros((int(L/h_x), int(L/h_x)))
 dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Modelo linfonodo
-estable_B = 8.4*10**-4
+estable_B = 2.48
+estable_T_c = 7
+estable_T_h = 4.3
 linfonodo_eqs = np.zeros(5)
 linfonodo_eqs[0]= 0    # Dendritic cells
-linfonodo_eqs[1]= 0.2  # Cytotoxic T cells
-linfonodo_eqs[2]= 0.4  # Helper T cells
+linfonodo_eqs[1]= estable_T_c  # Cytotoxic T cells
+linfonodo_eqs[2]= estable_T_h  # Helper T cells
 linfonodo_eqs[3]= estable_B    # B cells
 linfonodo_eqs[4]= 0    # Antibodies
 
@@ -212,10 +214,10 @@ parameters = {
     "rho_T": 2,
     "rho_Tc": 2,
     "rho_B": 16,
-    "rho_F": 5.1*10**4,
-    "estable_T_h": 8.4*10**-3,
+    "rho_F": 5.1*10,
+    "estable_T_h": estable_T_h,
     "estable_B": estable_B,
-    "estable_T_c": 8.4*10**-3,
+    "estable_T_c": estable_T_c,
     "DendriticasTecido": DendriticasTecido,
     "AnticorposTecido": AnticorposTecido,
     "TcitotoxicaTecido": TcitotoxicaTecido,
