@@ -72,7 +72,7 @@ def checkBVeLV():
     plt.show()
     plt.clf()
 
-checkBVeLV()
+# checkBVeLV()
 
 def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual, valor_medio, gradiente_odc_i, gradiente_odc_j):
     gradiente_pop_i = 0
@@ -176,7 +176,7 @@ def printMesh(time, population, type):
     plt.savefig('../results/'+type+'/fig'+'{:.4f}'.format(time*h_t)+'.png', dpi = 300)
     plt.clf()
 
-d_mic = (60*24*6.6/(2.5**2))*10**-5 # É para dividir ou multiplicar por 2.5 para fazer a malha de tamanho 10 representar 25 mm?
+d_mic = (60*24*6.6/(2.5**2))*10**-5
 
 parameters = {
     "chi": 0.298*60*2/(2.5**2), # Quimioatracao. valor por Dia
@@ -195,7 +195,7 @@ parameters = {
 
     "mu_dc": 60*24*3*10**-4, #Taxa de producao de células dendríticas (procurar na literatura)
     "gamma_D": 0.001, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
-    "gamma_F": 0.0003, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
+    "gamma_F": 0.00003, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
     "gamma_T": 0.2, #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 
     "t_cito_media": 37,
