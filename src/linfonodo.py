@@ -3,7 +3,7 @@ import numpy as np
 def diferential(y, parameters):
     
     dy = np.zeros(5)
-
+    
     # Dendritic cells
     dy[0] = parameters["gamma_D"] * (parameters["DendriticasTecido"] - y[0]) * (parameters["V_LV"] / parameters["V_LN"])
     # Cytotoxic T cells
