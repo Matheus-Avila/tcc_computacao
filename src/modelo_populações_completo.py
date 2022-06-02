@@ -54,7 +54,7 @@ V_LN = 160
 def checkBVeLV():
     x_pts, y_pts = np.meshgrid(x, x)
     max_population = 1
-    levels = np.linspace(0, max_population, 10)
+    levels = np.linspace(0, max_population, 3)
 
     cp = plt.contourf(x_pts, y_pts,theta_LV, levels=levels)
     plt.title("theta_LV")
@@ -126,13 +126,13 @@ dendritica_conv_atual = np.zeros((int(L/h_x), int(L/h_x)))
 dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Modelo linfonodo
-estable_B = 2.48
-estable_T_c = 7
-estable_T_h = 4.3
+estable_B = 8.4*10**-4
+estable_T_c = 8.4*10**-3
+estable_T_h = 8.4*10**-3
 linfonodo_eqs = np.zeros(5)
 linfonodo_eqs[0]= 0    # Dendritic cells
-linfonodo_eqs[1]= estable_T_c  # Cytotoxic T cells
-linfonodo_eqs[2]= estable_T_h  # Helper T cells
+linfonodo_eqs[1]= 0.2  # Cytotoxic T cells
+linfonodo_eqs[2]= 0.4  # Helper T cells
 linfonodo_eqs[3]= estable_B    # B cells
 linfonodo_eqs[4]= 0    # Antibodies
 
@@ -176,10 +176,10 @@ def printMesh(time, population, type):
     plt.savefig('../results/'+type+'/fig'+'{:.4f}'.format(time*h_t)+'.png', dpi = 300)
     plt.clf()
 
-d_mic = (60*24*6.6/(2.5**2))*10**-5
+d_mic = (60*24*6.6)*10**-5
 
 parameters = {
-    "chi": 0.298*60*2/(2.5**2), # Quimioatracao. valor por Dia
+    "chi": 0.298*60*2, # Quimioatracao. valor por Dia
     "D_mic": d_mic, # Difusao da microglia. valor por Dia
     "mu_m": 60*24*3*10**-6, # Taxa de ativação da microglia. valor por Dia
     "r_m": 60*24*3.96*10**-6, # intensidade dos danos causados pela microglia valor por Dia
@@ -187,15 +187,15 @@ parameters = {
     "d_dc": d_mic, # difusao DC convencional(procurar na literatura)
     "d_da": d_mic, # difusao DC ativada(procurar na literatura)
     "d_t_cit": d_mic, # difusao t citotóxica(procurar na literatura)
-    "d_anti": d_mic, # difusao anticorpo(procurar na literatura)
+    "d_anti": 2.5*d_mic, # difusao anticorpo(procurar na literatura)
     "lamb_f_m": 60*24*3.96*10**-6, # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
     "b_d": 0.001, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
     "r_dc": 0.001, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
     "r_t": 0.1 , # agressividade de t citotoxica(procurar na literatura)
 
     "mu_dc": 60*24*3*10**-4, #Taxa de producao de células dendríticas (procurar na literatura)
-    "gamma_D": 0.001, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
-    "gamma_F": 0.00003, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
+    "gamma_D": 0.1, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
+    "gamma_F": 0.3, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
     "gamma_T": 0.2, #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 
     "t_cito_media": 37,
@@ -214,7 +214,7 @@ parameters = {
     "rho_T": 2,
     "rho_Tc": 2,
     "rho_B": 16,
-    "rho_F": 5.1*10,
+    "rho_F": 5.1*10**2,
     "estable_T_h": estable_T_h,
     "estable_B": estable_B,
     "estable_T_c": estable_T_c,
@@ -394,7 +394,7 @@ for k in range(1,steps):
     parameters["TcitotoxicaTecido"] = TcitotoxicaTecido
     parameters["DendriticasTecido"] = DendriticasTecido
     parameters["AnticorposTecido"] = AnticorposTecido
-
+    
     linfonodo_eqs = [DL_atual, TL_c_atual, TL_h_atual, B_atual, FL_atual]
     DL_vetor[k] = DL_atual
     TL_c_vetor[k] = TL_c_atual
@@ -410,6 +410,9 @@ for k in range(1,steps):
         printMesh(k,t_cito_anterior, "tke")
         printMesh(k,anticorpo_anterior, "anticorpo")
         print("Tempo: "+ str(k*h_t))
+        print("DA: " + str(parameters["DendriticasTecido"]))
+        print("TC: " + str(parameters["AnticorposTecido"]))
+        print("AT: " + str(parameters["TcitotoxicaTecido"]))
 
 #Fim da contagem do tempo
 toc = time.perf_counter()
