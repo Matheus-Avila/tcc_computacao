@@ -16,7 +16,7 @@ T_final = 7*4# Dia
 h_t = 0.0002
 
 L = 10  # Comprimento da malha
-h_x = 0.2
+h_x = 0.5
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
@@ -36,17 +36,18 @@ V_BV = 0
 V_LV = 0
 
 theta_LV = np.zeros((int(L/h_x), int(L/h_x)))
-for i in range(int(L/h_x)):
-    for j in range(int(L/h_x)):
-        if (i == L/h_x - 1 and j == L/(h_x*2)) or (i == 0 and j == L/(h_x*2)) or (i == L/(h_x*2) and j == 0) or (i == L/(h_x*2) and j == L/h_x - 1) or (i == int(L/h_x)/2 and j == int(L/h_x)/2):
-            theta_LV[i][j] = 1
-            V_LV += 1
-
 theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
+        if (i == L/h_x - 1 and j == L/(h_x*2)) or (i == 0 and j == L/(h_x*2)) or (i == L/(h_x*2) and j == 0) or (i == L/(h_x*2) and j == L/h_x - 1) or (i == int(L/h_x)/2 and j == int(L/h_x)/2):
+            theta_BV[i][j] = 1#EU INVERTI BV COM LV!!!! LEMBRA DE RETORNAR APOS O TESTE DIA 2/6 19H
+            V_LV += 1
+
+
+for i in range(int(L/h_x)):
+    for j in range(int(L/h_x)):
         if (i == L/h_x - 1 and j == L/h_x - 1) or (i == 0 and j == L/h_x - 1) or (i == L/h_x - 1 and j == 0) or (i == 0 and j == 0):
-            theta_BV[i][j] = 1
+            theta_LV[i][j] = 1
             V_BV += 1
 
 V_LN = 160
@@ -54,7 +55,7 @@ V_LN = 160
 def checkBVeLV():
     x_pts, y_pts = np.meshgrid(x, x)
     max_population = 1
-    levels = np.linspace(0, max_population, 3)
+    levels = np.linspace(0, max_population, 5)
 
     cp = plt.contourf(x_pts, y_pts,theta_LV, levels=levels)
     plt.title("theta_LV")
@@ -72,7 +73,7 @@ def checkBVeLV():
     plt.show()
     plt.clf()
 
-# checkBVeLV()
+checkBVeLV()
 
 def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual, valor_medio, gradiente_odc_i, gradiente_odc_j):
     gradiente_pop_i = 0
@@ -176,7 +177,7 @@ def printMesh(time, population, type):
     plt.savefig('../results/'+type+'/fig'+'{:.4f}'.format(time*h_t)+'.png', dpi = 300)
     plt.clf()
 
-d_mic = (60*24*6.6)*10**-5
+d_mic = 60*24*6.6*10**-5
 
 parameters = {
     "chi": 0.298*60*2, # Quimioatracao. valor por Dia
