@@ -16,7 +16,7 @@ T_final = 7*4# Dia
 h_t = 0.0002
 
 L = 10  # Comprimento da malha
-h_x = 0.5
+h_x = 0.2
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
@@ -194,8 +194,8 @@ parameters = {
     "r_t": 0.1 , # agressividade de t citotoxica(procurar na literatura)
 
     "mu_dc": 60*24*3*10**-4, #Taxa de producao de células dendríticas (procurar na literatura)
-    "gamma_D": 0.1, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
-    "gamma_F": 0.3, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
+    "gamma_D": 0.01, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
+    "gamma_F": 0.03, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
     "gamma_T": 0.2, #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 
     "t_cito_media": 37,
