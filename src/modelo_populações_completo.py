@@ -15,7 +15,7 @@ f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + pop
 T_final = 7*4# Dia
 h_t = 0.0002
 
-L = 10  # Comprimento da malha
+L = 20  # Comprimento da malha
 h_x = 0.5
 
 t = np.linspace(0, T_final, int(T_final/h_t))
@@ -57,22 +57,20 @@ def checkBVeLV():
     levels = np.linspace(0, max_population, 3)
 
     cp = plt.contourf(x_pts, y_pts,theta_LV, levels=levels)
-    plt.title("theta_LV")
-    plt.xlabel("Milímetros")
-    plt.ylabel("Milímetros")
-    plt.colorbar(cp, label="Regiao perivascular")
+    plt.title("Perivascular space")
+    plt.xlabel("Millimeters")
+    plt.ylabel("Millimeters")
     plt.show()
     plt.clf()
 
     cp = plt.contourf(x_pts, y_pts,theta_BV, levels=levels)
-    plt.title("theta_BV")
-    plt.xlabel("Milímetros")
-    plt.ylabel("Milímetros")
-    plt.colorbar(cp, label="Vasos sanguineos")
+    plt.title("Blood vessels")
+    plt.xlabel("Millimeters")
+    plt.ylabel("Millimeters")
     plt.show()
     plt.clf()
 
-# checkBVeLV()
+checkBVeLV()
 
 def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual, valor_medio, gradiente_odc_i, gradiente_odc_j):
     gradiente_pop_i = 0
@@ -152,12 +150,12 @@ for i in range(int(L/h_x)):
 #**********************Funcao print dos resultados*************************
 
 populationTitle = {
-    "odc": "Oligodendrócitos destruídos",
+    "odc": "Destroyed oligodendrocytes",
     "microglia": "Microglia",
-    "dc": "Dendrítica convencional",
-    "da": "Dendrítica ativada",
-    "tke": "T citotóxica",
-    "anticorpo": "Anticorpos"
+    "dc": "Conventional dendritic cells",
+    "da": "Activated dendritic cells",
+    "tke": "T $CD8^+$",
+    "anticorpo": "Antibodies igG"
 }
 
 def printMesh(time, population, type):
@@ -170,13 +168,16 @@ def printMesh(time, population, type):
 
     cp = plt.contourf(x_pts, y_pts,population, levels=levels)
     plt.title(populationTitle[type])
-    plt.xlabel("Milímetros")
-    plt.ylabel("Milímetros")
-    plt.colorbar(cp, label="Concentração (células/$mm^2$)")
+    plt.xlabel("Millimeters")
+    plt.ylabel("Millimeters")
+    if type == "anticorpo":
+        plt.colorbar(cp, label="Concentration (molecules/$mm^2$)")
+    else:
+        plt.colorbar(cp, label="Concentration (cells/$mm^2$)")
     plt.savefig('../results/'+type+'/fig'+'{:.4f}'.format(time*h_t)+'.png', dpi = 300)
     plt.clf()
 
-d_mic = (60*24*6.6)*10**-5
+d_mic = (60*24*6.6/(2.5**2))*10**-5
 
 parameters = {
     "chi": 0.298*60*2, # Quimioatracao. valor por Dia
@@ -187,7 +188,7 @@ parameters = {
     "d_dc": d_mic, # difusao DC convencional(procurar na literatura)
     "d_da": d_mic, # difusao DC ativada(procurar na literatura)
     "d_t_cit": d_mic, # difusao t citotóxica(procurar na literatura)
-    "d_anti": 2.5*d_mic, # difusao anticorpo(procurar na literatura)
+    "d_anti": 10*d_mic, # difusao anticorpo(procurar na literatura)
     "lamb_f_m": 60*24*3.96*10**-6, # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
     "b_d": 0.001, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
     "r_dc": 0.001, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
@@ -386,8 +387,13 @@ for k in range(1,steps):
     for i in range(int(L/h_x)):
         for j in range(int(L/h_x)):
             if theta_LV[i][j] == 1:
+                if k%intervalo_figs ==0:
+                    print("DA-ponto: " + str(dendritica_ativ_atual[i][j]))
                 DendriticasTecido += dendritica_ativ_atual[i][j]
             if theta_BV[i][j] == 1:
+                if k%intervalo_figs ==0:
+                    print("AT-ponto: " + str(anticorpo_atual[i][j]))
+                    print("TCD8-ponto: " + str(t_cito_atual[i][j]))
                 AnticorposTecido += anticorpo_atual[i][j]
                 TcitotoxicaTecido += t_cito_atual[i][j]
 
@@ -425,36 +431,36 @@ print("Tempo de execução: " + str(final_time) + " min")
 # t = np.multiply(t,24)
 
 plt.plot(t,DL_vetor)
-plt.title("Dendríticas ativadas no linfonodo")
-plt.xlabel("Tempo (dias)")
-plt.ylabel("Concentração (células/$mm^2$)")
+plt.title("Lymph node - Activated dendritic cells")
+plt.xlabel("Time (days)")
+plt.ylabel("Concentration (Cells/$mm^2$)")
 plt.savefig('../results/dc_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,TL_c_vetor)
-plt.title("T citotóxicas no linfonodo")
-plt.xlabel("Tempo (dias)")
-plt.ylabel("Concentração (células/$mm^2$)")
+plt.title("Lymph node - T $CD8^+$")
+plt.xlabel("Time (days)")
+plt.ylabel("Concentration (Cells/$mm^2$)")
 plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,TL_h_vetor)
-plt.title("T helper no linfonodo")
-plt.xlabel("Tempo (dias)")
-plt.ylabel("Concentração (células/$mm^2$)")
+plt.title("Lymph node - T $CD4^+$")
+plt.xlabel("Time (days)")
+plt.ylabel("Concentration (Cells/$mm^2$)")
 plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,B_vetor)
-plt.title("Células B no linfonodo")
-plt.xlabel("Tempo (dias)")
-plt.ylabel("Concentração (células/$mm^2$)")
+plt.title("Lymph node - B Cells")
+plt.xlabel("Time (days)")
+plt.ylabel("Concentration (Cells/$mm^2$)")
 plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
 plt.clf()
 
 plt.plot(t,FL_vetor)
-plt.title("Anticorpos no linfonodo")
-plt.xlabel("Tempo (dias)")
-plt.ylabel("Concentração (células/$mm^2$)")
+plt.title("Lymph node - Antibodies")
+plt.xlabel("Time (days)")
+plt.ylabel("Concentration (Molecules/$mm^2$)")
 plt.savefig('../results/anticorpo_linfonodo.png', dpi = 300)
 plt.clf()
