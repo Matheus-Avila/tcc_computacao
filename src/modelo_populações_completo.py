@@ -16,7 +16,7 @@ T_final = 7*4# Dia
 h_t = 0.0002
 
 L = 10  # Comprimento da malha
-h_x = 0.2
+h_x = 0.5
 
 t = np.linspace(0, T_final, int(T_final/h_t))
 x = np.linspace(0, L, int(L/h_x))
@@ -386,10 +386,10 @@ for k in range(1,steps):
     for i in range(int(L/h_x)):
         for j in range(int(L/h_x)):
             if theta_LV[i][j] == 1:
-                DendriticasTecido += dendritica_ativ_anterior[i][j]
+                DendriticasTecido += dendritica_ativ_atual[i][j]
             if theta_BV[i][j] == 1:
-                AnticorposTecido += anticorpo_anterior[i][j]
-                TcitotoxicaTecido += t_cito_anterior[i][j]
+                AnticorposTecido += anticorpo_atual[i][j]
+                TcitotoxicaTecido += t_cito_atual[i][j]
 
     parameters["TcitotoxicaTecido"] = TcitotoxicaTecido
     parameters["DendriticasTecido"] = DendriticasTecido
