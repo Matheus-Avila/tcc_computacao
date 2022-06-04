@@ -129,9 +129,9 @@ estable_T_c = 8.4*10**-3
 estable_T_h = 8.4*10**-3
 linfonodo_eqs = np.zeros(5)
 linfonodo_eqs[0]= 0    # Dendritic cells
-linfonodo_eqs[1]= 0.2  # Cytotoxic T cells
-linfonodo_eqs[2]= 0.4  # Helper T cells
-linfonodo_eqs[3]= estable_B    # B cells
+linfonodo_eqs[1]= 0  # Cytotoxic T cells
+linfonodo_eqs[2]= 0  # Helper T cells
+linfonodo_eqs[3]= 0    # B cells
 linfonodo_eqs[4]= 0    # Antibodies
 
 #Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
