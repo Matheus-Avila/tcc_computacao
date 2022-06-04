@@ -35,18 +35,18 @@ def verifica_cfl(difusao_mic, difusao_dc, difusao_da, quimiotaxia_dc, quimiotaxi
 V_BV = 0
 V_LV = 0
 
+theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
 theta_LV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if (i == L/h_x - 1 and j == L/(h_x*2)) or (i == 0 and j == L/(h_x*2)) or (i == L/(h_x*2) and j == 0) or (i == L/(h_x*2) and j == L/h_x - 1) or (i == int(L/h_x)/2 and j == int(L/h_x)/2):
-            theta_LV[i][j] = 1
+            theta_BV[i][j] = 1
             V_LV += 1
 
-theta_BV = np.zeros((int(L/h_x), int(L/h_x)))
 for i in range(int(L/h_x)):
     for j in range(int(L/h_x)):
         if (i == L/h_x - 1 and j == L/h_x - 1) or (i == 0 and j == L/h_x - 1) or (i == L/h_x - 1 and j == 0) or (i == 0 and j == 0):
-            theta_BV[i][j] = 1
+            theta_LV[i][j] = 1
             V_BV += 1
 
 V_LN = 160
