@@ -519,7 +519,6 @@ estable_T_c = cp.Uniform(.9*8.4*10**-3, 1.1*8.4*10**-3)
 print('Distribuicoes criadas')
 
 
-
 # define parameter dictionary
 parameters = {
     "chi": chi,
