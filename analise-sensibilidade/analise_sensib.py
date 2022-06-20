@@ -1,7 +1,7 @@
-import uncertainpy as un
-import chaospy as cp
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from SALib.sample import saltelli
+from SALib.analyze import sobol
 from linfonodo import diferential
 
 gradiente = lambda ponto_posterior, ponto_anterior, valor_maximo: quimiotaxia(ponto_posterior, valor_maximo) - quimiotaxia(ponto_anterior, valor_maximo)
@@ -98,6 +98,7 @@ for i in range(int(L/h_x)):
 # T citotóxica
 t_cito_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 # Ol destruidos
+odc_media = 400
 olide_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
 # anticorpo
@@ -120,15 +121,12 @@ dendritica_conv_atual = np.zeros((int(L/h_x), int(L/h_x)))
 dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
 
 # Modelo linfonodo
-estable_B = 8.4*10**-4
-estable_T_c = 8.4*10**-3
-estable_T_h = 8.4*10**-3
-linfonodo_eqs = np.zeros(5)
-linfonodo_eqs[0]= 0    # Dendritic cells
-linfonodo_eqs[1]= 0.2  # Cytotoxic T cells
-linfonodo_eqs[2]= 0.4  # Helper T cells
-linfonodo_eqs[3]= estable_B    # B cells
-linfonodo_eqs[4]= 0    # Antibodies
+def init_lymph(linfonodo_eqs, estable_B, estable_T_c, estable_T_h):
+    linfonodo_eqs[0]= 0    # Dendritic cells
+    linfonodo_eqs[1]= 0.2  # Cytotoxic T cells
+    linfonodo_eqs[2]= 0.4  # Helper T cells
+    linfonodo_eqs[3]= estable_B    # B cells
+    linfonodo_eqs[4]= 0    # Antibodies
 
 #Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
 DendriticasTecido = 0
@@ -175,8 +173,9 @@ def printMesh(time, population, type):
 
 d_mic = (60*24*6.6/(2.5**2))*10**-5
 
-def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_dc, r_t, mu_dc, gamma_D, gamma_F, gamma_T, t_cito_media,dc_media, mic_media, odc_media, alpha_T_h, alpha_T_c, alpha_B, b_T, b_Tc, b_rho, b_rho_b, rho_T, rho_Tc, rho_B, rho_F, estable_T_h, estable_B, estable_T_c):
-
+def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_dc, r_t, mu_dc, gamma_D, gamma_F, gamma_T, alpha_T_h, alpha_T_c, alpha_B, b_T, b_Tc, b_rho, b_rho_b, rho_T, rho_Tc, rho_B, rho_F, estable_T_h, estable_B, estable_T_c):
+    
+    linfonodo_eqs = np.zeros(5)
     V_BV = 0
     V_LV = 0
 
@@ -195,7 +194,6 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
                 V_BV += 1
 
     V_LN = 160
-
 
     mic_anterior = np.zeros((int(L/h_x), int(L/h_x)))
 
@@ -225,12 +223,7 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
     dendritica_conv_atual = np.zeros((int(L/h_x), int(L/h_x)))
     dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
 
-    linfonodo_eqs = np.zeros(5)
-    linfonodo_eqs[0]= 0    # Dendritic cells
-    linfonodo_eqs[1]= 0.2  # Cytotoxic T cells
-    linfonodo_eqs[2]= 0.4  # Helper T cells
-    linfonodo_eqs[3]= estable_B    # B cells
-    linfonodo_eqs[4]= 0    # Antibodies
+    init_lymph(estable_B, estable_T_c, estable_T_h)
 
     #Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
     DendriticasTecido = 0
@@ -246,24 +239,24 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
                 TcitotoxicaTecido += t_cito_anterior[i][j]
     qoi = np.zeros(len(t))
     parameters = {
-        "chi": 0.298*60*2, # Quimioatracao. valor por Dia
+        "chi": chi, # Quimioatracao. valor por Dia
         "D_mic": d_mic, # Difusao da microglia. valor por Dia
-        "mu_m": 60*24*3*10**-6, # Taxa de ativação da microglia. valor por Dia
-        "r_m": 60*24*3.96*10**-6, # intensidade dos danos causados pela microglia valor por Dia
+        "mu_m": mu_m, # Taxa de ativação da microglia. valor por Dia
+        "r_m": r_m, # intensidade dos danos causados pela microglia valor por Dia
 
-        "d_dc": d_mic, # difusao DC convencional(procurar na literatura)
-        "d_da": d_mic, # difusao DC ativada(procurar na literatura)
-        "d_t_cit": d_mic, # difusao t citotóxica(procurar na literatura)
-        "d_anti": 10*d_mic, # difusao anticorpo(procurar na literatura)
-        "lamb_f_m": 60*24*3.96*10**-6, # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
-        "b_d": 0.001, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
-        "r_dc": 0.001, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
-        "r_t": 0.1 , # agressividade de t citotoxica(procurar na literatura)
+        "d_dc": d_dc, # difusao DC convencional(procurar na literatura)
+        "d_da": d_da, # difusao DC ativada(procurar na literatura)
+        "d_t_cit": d_t_cit, # difusao t citotóxica(procurar na literatura)
+        "d_anti": d_anti, # difusao anticorpo(procurar na literatura)
+        "lamb_f_m": lamb_f_m, # taxa de anticorpos consumidos durante o processo de opsonização pela micróglia
+        "b_d": b_d, # taxa de ativacao de dc por odc destruidos(procurar na literatura)
+        "r_dc": r_dc, # taxa de coleta de odc destruidos pelas DCs (procurar na literatura)
+        "r_t": r_t, # agressividade de t citotoxica(procurar na literatura)
 
-        "mu_dc": 60*24*3*10**-4, #Taxa de producao de células dendríticas (procurar na literatura)
-        "gamma_D": 0.01, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
-        "gamma_F": 0.03, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
-        "gamma_T": 0.2, #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
+        "mu_dc": mu_dc, #Taxa de producao de células dendríticas (procurar na literatura)
+        "gamma_D": gamma_D, #Taxa de migração de DC ativadas para o linfonodo (procurar na literatura)
+        "gamma_F": gamma_F, #Taxa de migração de anticorpos para o tecido (procurar na literatura)
+        "gamma_T": gamma_T, #Taxa de migração de T citotoxica para o tecido (procurar na literatura)
 
         "t_cito_media": 37,
         "dc_media": dc_media,
@@ -271,17 +264,17 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
         "odc_media": 400,
 
 
-        "alpha_T_h": 0.01 ,
-        "alpha_T_c": 0.5,
-        "alpha_B": 1,
-        "b_T": 0.017,
-        "b_Tc": 0.005,
-        "b_rho": 10**5,
-        "b_rho_b": 6.02*10**3,
-        "rho_T": 2,
-        "rho_Tc": 2,
-        "rho_B": 16,
-        "rho_F": 5.1*10**2,
+        "alpha_T_h": alpha_T_h,
+        "alpha_T_c": alpha_T_c,
+        "alpha_B": alpha_B,
+        "b_T": b_T,
+        "b_Tc": b_Tc,
+        "b_rho": b_rho,
+        "b_rho_b": b_rho_b,
+        "rho_T": rho_T,
+        "rho_Tc": rho_Tc,
+        "rho_B": rho_B,
+        "rho_F": rho_F,
         "estable_T_h": estable_T_h,
         "estable_B": estable_B,
         "estable_T_c": estable_T_c,
@@ -469,100 +462,109 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
         TL_h_vetor[k] = TL_h_atual
         B_vetor[k] = B_atual
         FL_vetor[k] = FL_atual
-        return t, qoi
+        return qoi[-1]
 
-model = un.Model(
-    run = modelo,
-    labels=["Time (days)",
-        "Lesion size"]
-)
+chi_mean = 0.298*60*2
+d_mic_mean = 1520*10**-5
+mu_m_mean = 60*24*3*10**-6
+r_m_mean = 60*24*3.96*10**-6
+d_dc_mean = 1520*10**-5
+d_da_mean = 1520*10**-5
+d_t_cit_mean = 1520*10**-5
+d_anti_mean = 1520*10**-4
+lamb_f_m_mean = 60*24*3.96*10**-6
+b_d_mean = 0.001
+r_dc_mean = 0.001
+r_t_mean = 0.1
+mu_dc_mean = 60*24*3*10**-4
+gamma_D_mean = 0.01
+gamma_F_mean = 0.03
+gamma_T_mean = 0.2
+alpha_T_h_mean = 0.01 
+alpha_T_c_mean = 0.5
+alpha_B_mean = 1
+b_T_mean = 0.017
+b_Tc_mean = 0.005
+b_rho_mean = 10**5
+b_rho_b_mean = 6.02*10**3
+rho_T_mean = 2
+rho_Tc_mean = 2
+rho_B_mean = 16
+rho_F_mean = 5.1*10**2
+estable_T_h_mean = 8.4*10**-3
+estable_B_mean = 8.4*10**-4
+estable_T_c_mean = 8.4*10**-3
 
-# create distributions
-
-print('Criando distribuicoes uniformes')
-
-chi = cp.Uniform(0.298*60*2*.9, 0.298*60*2*1.1)
-d_mic = cp.Uniform((.9*60*24*6.6/(2.5**2))*10**-5, (1.1*60*24*6.6/(2.5**2))*10**-5)
-mu_m = cp.Uniform(.9*60*24*3*10**-6, 1.1*60*24*3*10**-6)
-r_m = cp.Uniform(.9*60*24*3.96*10**-6, 1.1*60*24*3.96*10**-6)
-d_dc = cp.Uniform((.9*60*24*6.6/(2.5**2))*10**-5, (1.1*60*24*6.6/(2.5**2))*10**-5)
-d_da = cp.Uniform((.9*60*24*6.6/(2.5**2))*10**-5, (1.1*60*24*6.6/(2.5**2))*10**-5)
-d_t_cit = cp.Uniform((.9*60*24*6.6/(2.5**2))*10**-5, (1.1*60*24*6.6/(2.5**2))*10**-5)
-d_anti = cp.Uniform((.9*600*24*6.6/(2.5**2))*10**-5, (1.1*600*24*6.6/(2.5**2))*10**-5)
-lamb_f_m = cp.Uniform(.9*60*24*3.96*10**-6, 1.1*60*24*3.96*10**-6)
-b_d = cp.Uniform(.9*0.001, 1.1*0.001)
-r_dc = cp.Uniform(.9*0.001, 1.1*0.001)
-r_t = cp.Uniform(.9*0.1, 1.1*0.1)
-mu_dc = cp.Uniform(.9*60*24*3*10**-4, 1.1*60*24*3*10**-4)
-gamma_D = cp.Uniform(.9*0.01, 1.1*0.01)
-gamma_F = cp.Uniform(.9*0.03, 1.1*0.03)
-gamma_T = cp.Uniform(.9*0.2, 1.1*0.2)
-t_cito_media = cp.Uniform(.9*37, 1.1*37)
-dc_media = cp.Uniform(.9*33, 1.1*33)
-mic_media = cp.Uniform(.9*350,1.1*350)
-odc_media = cp.Uniform(.9*400,1.1*400)
-
-alpha_T_h = cp.Uniform(.9*0.01, 1.1*0.01)
-alpha_T_c = cp.Uniform(.9*0.5, 1.1*0.5)
-alpha_B = cp.Uniform(.9*1, 1.1*1)
-b_T = cp.Uniform(.9*0.017, 1.1*0.017)
-b_Tc = cp.Uniform(.9*0.005, 1.1*0.005)
-b_rho = cp.Uniform(.9*10**5, 1.1*10**5)
-b_rho_b = cp.Uniform(.9*6.02*10**3, 1.1*6.02*10**3)
-rho_T = cp.Uniform(.9*2, 1.1*2)
-rho_Tc = cp.Uniform(.9*2, 1.1*2)
-rho_B = cp.Uniform(.9*16, 1.1*16)
-rho_F = cp.Uniform(.9*5.1*10**2, 1.1*5.1*10**2)
-estable_T_h = cp.Uniform(.9*8.4*10**-3, 1.1*8.4*10**-3)
-estable_B = cp.Uniform(.9*8.4*10**-4, 1.1*8.4*10**-4)
-estable_T_c = cp.Uniform(.9*8.4*10**-3, 1.1*8.4*10**-3)
-print('Distribuicoes criadas')
-
-
-# define parameter dictionary
-parameters = {
-    "chi": chi,
-    "d_mic": d_mic,
-    "mu_m": mu_m,
-    "r_m": r_m,
-    "d_dc": d_dc,
-    "d_da": d_da,
-    "d_t_cit": d_t_cit,
-    "d_anti": d_anti,
-    "lamb_f_m": lamb_f_m,
-    "b_d": b_d,
-    "r_dc": r_dc,
-    "r_t": r_t,
-    "mu_dc": mu_dc,
-    "gamma_D": gamma_D,
-    "gamma_F": gamma_F,
-    "gamma_T": gamma_T,
-    "t_cito_media": t_cito_media,
-    "dc_media": dc_media,
-    "mic_media": mic_media,
-    "odc_media": odc_media,
-    "alpha_T_h": alpha_T_h,
-    "alpha_T_c": alpha_T_c,
-    "alpha_B": alpha_B,
-    "b_T": b_T,
-    "b_Tc": b_Tc,
-    "b_rho": b_rho,
-    "b_rho_b": b_rho_b,
-    "rho_T": rho_T,
-    "rho_Tc": rho_Tc,
-    "rho_B": rho_B,
-    "rho_F": rho_F,
-    "estable_T_h": estable_T_h,
-    "estable_B": estable_B,
-    "estable_T_c": estable_T_c
+problem = {
+    'num_vars': 30,
+    'names': [ 'chi',
+        'd_mic',
+        'mu_m',
+        'r_m',
+        'd_dc',
+        'd_da',
+        'd_t_cit',
+        'd_anti',
+        'lamb_f_m',
+        'b_d',
+        'r_dc',
+        'r_t',
+        'mu_dc',
+        'gamma_D',
+        'gamma_F',
+        'gamma_T',
+        'alpha_T_h',
+        'alpha_T_c',
+        'alpha_B',
+        'b_T',
+        'b_Tc',
+        'b_rho',
+        'b_rho_b',
+        'rho_T',
+        'rho_Tc',
+        'rho_B',
+        'rho_F',
+        'estable_T_h',
+        'estable_B',
+        'estable_T_c'
+    ],
+    'bounds': [
+        [0.9*chi_mean, 1.1*chi_mean],
+        [0.9*d_mic_mean, 1.1*d_mic_mean],
+        [0.9*mu_m_mean, 1.1*mu_m_mean],
+        [0.9*r_m_mean, 1.1*r_m_mean],
+        [0.9*d_dc_mean, 1.1*d_dc_mean],
+        [0.9*d_da_mean, 1.1*d_da_mean],
+        [0.9*d_t_cit_mean, 1.1*d_t_cit_mean],
+        [0.9*d_anti_mean, 1.1*d_anti_mean],
+        [0.9*lamb_f_m_mean, 1.1*lamb_f_m_mean],
+        [0.9*b_d_mean, 1.1*b_d_mean],
+        [0.9*r_dc_mean, 1.1*r_dc_mean],
+        [0.9*r_t_mean, 1.1*r_t_mean],
+        [0.9*mu_dc_mean, 1.1*mu_dc_mean],
+        [0.9*gamma_D_mean, 1.1*gamma_D_mean],
+        [0.9*gamma_F_mean, 1.1*gamma_F_mean],
+        [0.9*gamma_T_mean, 1.1*gamma_T_mean],
+        [0.9*alpha_T_h_mean, 1.1*alpha_T_h_mean],
+        [0.9*alpha_T_c_mean, 1.1*alpha_T_c_mean],
+        [0.9*alpha_B_mean, 1.1*alpha_B_mean],
+        [0.9*b_T_mean, 1.1*b_T_mean],
+        [0.9*b_Tc_mean, 1.1*b_Tc_mean],
+        [0.9*b_rho_mean, 1.1*b_rho_mean],
+        [0.9*b_rho_b_mean, 1.1*b_rho_b_mean],
+        [0.9*rho_T_mean, 1.1*rho_T_mean],
+        [0.9*rho_Tc_mean, 1.1*rho_Tc_mean],
+        [0.9*rho_B_mean, 1.1*rho_B_mean],
+        [0.9*rho_F_mean, 1.1*rho_F_mean],
+        [0.9*estable_T_h_mean, 1.1*estable_T_h_mean],
+        [0.9*estable_B_mean, 1.1*estable_B_mean],
+        [0.9*estable_T_c_mean, 1.1*estable_T_c_mean]
+    ]
 }
 
-# set up UQ
-UQ = un.UncertaintyQuantification(
-    model=model,
-    parameters=parameters
-)
+param_values = saltelli.sample(problem, 20)
 
-print('Inicio UQ --- ')
-data = UQ.monte_carlo(nr_samples=10)
-print(' --- Fim UQ')
+y = np.array([modelo(*params) for params in param_values])
+
+sobol_indices = [sobol.analyze(problem, Y) for Y in y.T]
+
