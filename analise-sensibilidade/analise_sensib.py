@@ -223,7 +223,7 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
     dendritica_conv_atual = np.zeros((int(L/h_x), int(L/h_x)))
     dendritica_ativ_atual = np.zeros((int(L/h_x), int(L/h_x)))
 
-    init_lymph(estable_B, estable_T_c, estable_T_h)
+    init_lymph(linfonodo_eqs, estable_B, estable_T_c, estable_T_h)
 
     #Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
     DendriticasTecido = 0
@@ -562,7 +562,7 @@ problem = {
     ]
 }
 
-param_values = saltelli.sample(problem, 20)
+param_values = saltelli.sample(problem, 2**4)
 
 y = np.array([modelo(*params) for params in param_values])
 
