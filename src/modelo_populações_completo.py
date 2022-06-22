@@ -12,8 +12,8 @@ gradiente = lambda ponto_posterior, ponto_anterior, valor_maximo: quimiotaxia(po
 quimiotaxia = lambda ponto_atual, valor_maximo: ponto_atual/(valor_maximo + ponto_atual)
 f_func = lambda populacao, valor_maximo: populacao*populacao/(valor_maximo + populacao)
 
-T_final = 7*4# Dia
-h_t = 0.0002
+T_final = 1# Dia
+h_t = 0.002
 
 L = 20  # Comprimento da malha
 h_x = 0.2
@@ -23,7 +23,7 @@ x = np.linspace(0, L, int(L/h_x))
 tam = len(x)
 steps = len(t)
 
-num_figuras = T_final
+num_figuras = 10
 intervalo_figs = int(steps/num_figuras)
 
 def verifica_cfl(difusao_mic, difusao_dc, difusao_da, quimiotaxia_dc, quimiotaxia_mic):
@@ -70,7 +70,7 @@ def checkBVeLV():
     plt.show()
     plt.clf()
 
-checkBVeLV()
+# checkBVeLV()
 
 def calculaQuimiotaxia(ponto_posterior_j, ponto_anterior_j, ponto_posterior_i, ponto_anterior_i, ponto_atual, valor_medio, gradiente_odc_i, gradiente_odc_j):
     gradiente_pop_i = 0
@@ -257,7 +257,7 @@ printMesh(0,anticorpo_anterior, "anticorpo")
 
 #Inicio da contagem do tempo
 tic = time.perf_counter()
-
+qoi = np.zeros(len(t))
 for k in range(1,steps):
     dy = diferential(linfonodo_eqs, parameters)
     DL_atual = linfonodo_eqs[0] + h_t*dy[0]
@@ -408,17 +408,23 @@ for k in range(1,steps):
     B_vetor[k] = B_atual
     FL_vetor[k] = FL_atual
 
+    aux_qoi = 0
+    for i in range(tam):
+        for j in range(tam):
+            aux_qoi = aux_qoi + olide_atual[i][j]
+    qoi[k] = aux_qoi
+
     if k%intervalo_figs ==0 or k == steps-1:
-        printMesh(k,olide_anterior, "odc")
-        printMesh(k,mic_anterior, "microglia")
-        printMesh(k,dendritica_conv_anterior, "dc")
-        printMesh(k,dendritica_ativ_anterior, "da")
-        printMesh(k,t_cito_anterior, "tke")
-        printMesh(k,anticorpo_anterior, "anticorpo")
+    #     printMesh(k,olide_anterior, "odc")
+    #     printMesh(k,mic_anterior, "microglia")
+    #     printMesh(k,dendritica_conv_anterior, "dc")
+    #     printMesh(k,dendritica_ativ_anterior, "da")
+    #     printMesh(k,t_cito_anterior, "tke")
+    #     printMesh(k,anticorpo_anterior, "anticorpo")
         print("Tempo: "+ str(k*h_t))
-        print("DA: " + str(parameters["DendriticasTecido"]))
-        print("TC: " + str(parameters["AnticorposTecido"]))
-        print("AT: " + str(parameters["TcitotoxicaTecido"]))
+    #     print("DA: " + str(parameters["DendriticasTecido"]))
+    #     print("TC: " + str(parameters["AnticorposTecido"]))
+    #     print("AT: " + str(parameters["TcitotoxicaTecido"]))
 
 #Fim da contagem do tempo
 toc = time.perf_counter()
@@ -427,40 +433,41 @@ final_time = (toc - tic)/60
 
 print("Tempo de execução: " + str(final_time) + " min")
 
+print("QOI: " + str(qoi[-1]))
 #Transforma de dias para horas no plot
 # t = np.multiply(t,24)
 
-plt.plot(t,DL_vetor)
-plt.title("Lymph node - Activated dendritic cells")
-plt.xlabel("Time (days)")
-plt.ylabel("Concentration (Cells/$mm^2$)")
-plt.savefig('../results/dc_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,DL_vetor)
+# plt.title("Lymph node - Activated dendritic cells")
+# plt.xlabel("Time (days)")
+# plt.ylabel("Concentration (Cells/$mm^2$)")
+# plt.savefig('../results/dc_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,TL_c_vetor)
-plt.title("Lymph node - T $CD8^+$")
-plt.xlabel("Time (days)")
-plt.ylabel("Concentration (Cells/$mm^2$)")
-plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,TL_c_vetor)
+# plt.title("Lymph node - T $CD8^+$")
+# plt.xlabel("Time (days)")
+# plt.ylabel("Concentration (Cells/$mm^2$)")
+# plt.savefig('../results/t_cito_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,TL_h_vetor)
-plt.title("Lymph node - T $CD4^+$")
-plt.xlabel("Time (days)")
-plt.ylabel("Concentration (Cells/$mm^2$)")
-plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,TL_h_vetor)
+# plt.title("Lymph node - T $CD4^+$")
+# plt.xlabel("Time (days)")
+# plt.ylabel("Concentration (Cells/$mm^2$)")
+# plt.savefig('../results/t_helper_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,B_vetor)
-plt.title("Lymph node - B Cells")
-plt.xlabel("Time (days)")
-plt.ylabel("Concentration (Cells/$mm^2$)")
-plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,B_vetor)
+# plt.title("Lymph node - B Cells")
+# plt.xlabel("Time (days)")
+# plt.ylabel("Concentration (Cells/$mm^2$)")
+# plt.savefig('../results/b_cell_linfonodo.png', dpi = 300)
+# plt.clf()
 
-plt.plot(t,FL_vetor)
-plt.title("Lymph node - Antibodies")
-plt.xlabel("Time (days)")
-plt.ylabel("Concentration (Molecules/$mm^2$)")
-plt.savefig('../results/anticorpo_linfonodo.png', dpi = 300)
-plt.clf()
+# plt.plot(t,FL_vetor)
+# plt.title("Lymph node - Antibodies")
+# plt.xlabel("Time (days)")
+# plt.ylabel("Concentration (Molecules/$mm^2$)")
+# plt.savefig('../results/anticorpo_linfonodo.png', dpi = 300)
+# plt.clf()

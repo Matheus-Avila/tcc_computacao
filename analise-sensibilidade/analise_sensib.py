@@ -427,7 +427,7 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
         mic_anterior = np.copy(mic_atual)
 
         #calcula QoI
-        aux_qoi = 0
+        aux_qoi = 1
         for i in range(tam):
             for j in range(tam):
                 if olide_atual[i][j] >= odc_media*.6:
@@ -561,10 +561,16 @@ problem = {
         [0.9*estable_T_c_mean, 1.1*estable_T_c_mean]
     ]
 }
+print("Creating Samples")
 
-param_values = saltelli.sample(problem, 2**4)
+param_values = saltelli.sample(problem, 2**6)
+
+print("Running Model")
 
 y = np.array([modelo(*params) for params in param_values])
 
-sobol_indices = [sobol.analyze(problem, Y) for Y in y.T]
+sobol_indices = sobol.analyze(problem, y, print_to_console=True)
 
+# sobol_indices = [sobol.analyze(problem, Y, print_to_console=True) for Y in y.T]
+
+print("Done!")
