@@ -427,11 +427,10 @@ def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_
         mic_anterior = np.copy(mic_atual)
 
         #calcula QoI
-        aux_qoi = 1
+        aux_qoi = 0
         for i in range(tam):
             for j in range(tam):
-                if olide_atual[i][j] >= odc_media*.6:
-                    aux_qoi = aux_qoi + 1
+                aux_qoi = aux_qoi + olide_atual[i][j]
         qoi[k] = aux_qoi
         #Atualização da concentração das populações que migram.
         #Valores das populaçoes que migram que estão em contato com os vasos sanguineos ou linfaticos
