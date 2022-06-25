@@ -173,9 +173,41 @@ def printMesh(time, population, type):
 
 d_mic = (60*24*6.6/(2.5**2))*10**-5
 
-def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_dc, r_t, mu_dc, gamma_D, gamma_F, gamma_T, alpha_T_h, alpha_T_c, alpha_B, b_T, b_Tc, b_rho, b_rho_b, rho_T, rho_Tc, rho_B, rho_F, estable_T_h, estable_B, estable_T_c):
-    
+# def modelo(chi, d_mic, mu_m, r_m, d_dc, d_da, d_t_cit, d_anti, lamb_f_m, b_d, r_dc, r_t, mu_dc, gamma_D, gamma_F, gamma_T, alpha_T_h, alpha_T_c, alpha_B, b_T, b_Tc, b_rho, b_rho_b, rho_T, rho_Tc, rho_B, rho_F, estable_T_h, estable_B, estable_T_c):
+def modelo(mu_m, r_m, lamb_f_m):    
     linfonodo_eqs = np.zeros(5)
+    
+    chi = 0.298*60*2
+    d_mic = 1520*10**-5
+    # mu_m = 60*24*3*10**-6
+    # r_m = 60*24*3.96*10**-6
+    d_dc = 1520*10**-5
+    d_da = 1520*10**-5
+    d_t_cit = 1520*10**-5
+    d_anti = 1520*10**-4
+    # lamb_f_m = 60*24*3.96*10**-6
+    b_d = 0.001
+    r_dc = 0.001
+    r_t = 0.1
+    mu_dc = 60*24*3*10**-4
+    gamma_D = 0.01
+    gamma_F = 0.03
+    gamma_T = 0.2
+    alpha_T_h = 0.01 
+    alpha_T_c = 0.5
+    alpha_B = 1
+    b_T = 0.017
+    b_Tc = 0.005
+    b_rho = 10**5
+    b_rho_b = 6.02*10**3
+    rho_T = 2
+    rho_Tc = 2
+    rho_B = 16
+    rho_F = 5.1*10**2
+    estable_T_h = 8.4*10**-3
+    estable_B = 8.4*10**-4
+    estable_T_c = 8.4*10**-3
+    
     V_BV = 0
     V_LV = 0
 
@@ -495,78 +527,99 @@ estable_B_mean = 8.4*10**-4
 estable_T_c_mean = 8.4*10**-3
 
 problem = {
-    'num_vars': 30,
-    'names': [ 'chi',
-        'd_mic',
+    'num_vars': 3,
+    'names': [ #'chi',
+        # 'd_mic',
         'mu_m',
         'r_m',
-        'd_dc',
-        'd_da',
-        'd_t_cit',
-        'd_anti',
-        'lamb_f_m',
-        'b_d',
-        'r_dc',
-        'r_t',
-        'mu_dc',
-        'gamma_D',
-        'gamma_F',
-        'gamma_T',
-        'alpha_T_h',
-        'alpha_T_c',
-        'alpha_B',
-        'b_T',
-        'b_Tc',
-        'b_rho',
-        'b_rho_b',
-        'rho_T',
-        'rho_Tc',
-        'rho_B',
-        'rho_F',
-        'estable_T_h',
-        'estable_B',
-        'estable_T_c'
+        # 'd_dc',
+        # 'd_da',
+        # 'd_t_cit',
+        # 'd_anti',
+        'lamb_f_m'#,
+        # 'b_d',
+        # 'r_dc',
+        # 'r_t',
+        # 'mu_dc',
+        # 'gamma_D',
+        # 'gamma_F',
+        # 'gamma_T',
+        # 'alpha_T_h',
+        # 'alpha_T_c',
+        # 'alpha_B',
+        # 'b_T',
+        # 'b_Tc',
+        # 'b_rho',
+        # 'b_rho_b',
+        # 'rho_T',
+        # 'rho_Tc',
+        # 'rho_B',
+        # 'rho_F',
+        # 'estable_T_h',
+        # 'estable_B',
+        # 'estable_T_c'
     ],
     'bounds': [
-        [0.9*chi_mean, 1.1*chi_mean],
-        [0.9*d_mic_mean, 1.1*d_mic_mean],
+        # [0.9*chi_mean, 1.1*chi_mean],
+        # [0.9*d_mic_mean, 1.1*d_mic_mean],
         [0.9*mu_m_mean, 1.1*mu_m_mean],
         [0.9*r_m_mean, 1.1*r_m_mean],
-        [0.9*d_dc_mean, 1.1*d_dc_mean],
-        [0.9*d_da_mean, 1.1*d_da_mean],
-        [0.9*d_t_cit_mean, 1.1*d_t_cit_mean],
-        [0.9*d_anti_mean, 1.1*d_anti_mean],
+        # [0.9*d_dc_mean, 1.1*d_dc_mean],
+        # [0.9*d_da_mean, 1.1*d_da_mean],
+        # [0.9*d_t_cit_mean, 1.1*d_t_cit_mean],
+        # [0.9*d_anti_mean, 1.1*d_anti_mean],
         [0.9*lamb_f_m_mean, 1.1*lamb_f_m_mean],
-        [0.9*b_d_mean, 1.1*b_d_mean],
-        [0.9*r_dc_mean, 1.1*r_dc_mean],
-        [0.9*r_t_mean, 1.1*r_t_mean],
-        [0.9*mu_dc_mean, 1.1*mu_dc_mean],
-        [0.9*gamma_D_mean, 1.1*gamma_D_mean],
-        [0.9*gamma_F_mean, 1.1*gamma_F_mean],
-        [0.9*gamma_T_mean, 1.1*gamma_T_mean],
-        [0.9*alpha_T_h_mean, 1.1*alpha_T_h_mean],
-        [0.9*alpha_T_c_mean, 1.1*alpha_T_c_mean],
-        [0.9*alpha_B_mean, 1.1*alpha_B_mean],
-        [0.9*b_T_mean, 1.1*b_T_mean],
-        [0.9*b_Tc_mean, 1.1*b_Tc_mean],
-        [0.9*b_rho_mean, 1.1*b_rho_mean],
-        [0.9*b_rho_b_mean, 1.1*b_rho_b_mean],
-        [0.9*rho_T_mean, 1.1*rho_T_mean],
-        [0.9*rho_Tc_mean, 1.1*rho_Tc_mean],
-        [0.9*rho_B_mean, 1.1*rho_B_mean],
-        [0.9*rho_F_mean, 1.1*rho_F_mean],
-        [0.9*estable_T_h_mean, 1.1*estable_T_h_mean],
-        [0.9*estable_B_mean, 1.1*estable_B_mean],
-        [0.9*estable_T_c_mean, 1.1*estable_T_c_mean]
+        # [0.9*b_d_mean, 1.1*b_d_mean],
+        # [0.9*r_dc_mean, 1.1*r_dc_mean],
+        # [0.9*r_t_mean, 1.1*r_t_mean],
+        # [0.9*mu_dc_mean, 1.1*mu_dc_mean],
+        # [0.9*gamma_D_mean, 1.1*gamma_D_mean],
+        # [0.9*gamma_F_mean, 1.1*gamma_F_mean],
+        # [0.9*gamma_T_mean, 1.1*gamma_T_mean],
+        # [0.9*alpha_T_h_mean, 1.1*alpha_T_h_mean],
+        # [0.9*alpha_T_c_mean, 1.1*alpha_T_c_mean],
+        # [0.9*alpha_B_mean, 1.1*alpha_B_mean],
+        # [0.9*b_T_mean, 1.1*b_T_mean],
+        # [0.9*b_Tc_mean, 1.1*b_Tc_mean],
+        # [0.9*b_rho_mean, 1.1*b_rho_mean],
+        # [0.9*b_rho_b_mean, 1.1*b_rho_b_mean],
+        # [0.9*rho_T_mean, 1.1*rho_T_mean],
+        # [0.9*rho_Tc_mean, 1.1*rho_Tc_mean],
+        # [0.9*rho_B_mean, 1.1*rho_B_mean],
+        # [0.9*rho_F_mean, 1.1*rho_F_mean],
+        # [0.9*estable_T_h_mean, 1.1*estable_T_h_mean],
+        # [0.9*estable_B_mean, 1.1*estable_B_mean],
+        # [0.9*estable_T_c_mean, 1.1*estable_T_c_mean]
     ]
 }
+
+problem = {
+    'num_vars': 3,
+    'names': [
+        'a',
+        'b',
+        'c'
+    ],
+    'bounds': [
+        [-1,1],
+        [-1,1],
+        [-1,1]
+    ]
+}
+
+def teste(a, b, c):
+    print("a: " + str(a))
+    print("b: " + str(b))
+    print("c: " + str(c))
+    return a + b + c
+
 print("Creating Samples")
 
-param_values = saltelli.sample(problem, 2**6)
+param_values = saltelli.sample(problem, 2**3)
 
 print("Running Model")
 
-y = np.array([modelo(*params) for params in param_values])
+y = np.array([teste(*params) for params in param_values])
 
 sobol_indices = sobol.analyze(problem, y, print_to_console=True)
 
