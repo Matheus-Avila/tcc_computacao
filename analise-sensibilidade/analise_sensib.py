@@ -593,7 +593,7 @@ problem = {
     ]
 }
 
-problem = {
+problem_teste = {
     'num_vars': 3,
     'names': [
         'a',
@@ -608,21 +608,28 @@ problem = {
 }
 
 def teste(a, b, c):
-    print("a: " + str(a))
-    print("b: " + str(b))
-    print("c: " + str(c))
     return a + b + c
 
-print("Creating Samples")
-
-param_values = saltelli.sample(problem, 2**3)
-
 print("Running Model")
+sample = saltelli.sample(problem, 50, calc_second_order=False)
+Y = np.empty([sample.shape[0]])
 
-y = np.array([teste(*params) for params in param_values])
+# evaluate the model for eah point in the input sample
+for i in range(len(Y)):
+    x = sample[i]
+    Y[i] = modelo(x[0], x[1], x[2])
 
-sobol_indices = sobol.analyze(problem, y, print_to_console=True)
+# estimate the sensitivity indices using Sobol's method
+sensitivity = sobol.analyze(problem, Y, calc_second_order=False)
 
-# sobol_indices = [sobol.analyze(problem, Y, print_to_console=True) for Y in y.T]
+# firstorder indices
+print("First-order or main effect indices")
+print(sensitivity['S1'])
+# interpretation: x1 contributes to half of the 
+# total output uncertainty
+
+# higher-order indices
+print("Higher-order or total (interactions) indices")
+print(sensitivity['ST'])
 
 print("Done!")
