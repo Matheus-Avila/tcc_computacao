@@ -493,7 +493,11 @@ def modelo(mu_m, r_m, lamb_f_m):
         TL_h_vetor[k] = TL_h_atual
         B_vetor[k] = B_atual
         FL_vetor[k] = FL_atual
-        return qoi[-1]
+    print("Terminei de rodar uma vez!")
+    outputFile = open("returns.txt", "a")
+    outputFile.write(str(qoi[-1]) + "\n")
+    outputFile.close()
+    return qoi[-1]
 
 chi_mean = 0.298*60*2
 d_mic_mean = 1520*10**-5
@@ -608,11 +612,19 @@ problem_teste = {
 }
 
 def teste(a, b, c):
+    outputFile = open("returns.txt", "a")
+    outputFile.write(str(a + b + c) + "\n")
+    outputFile.close()
     return a + b + c
 
 print("Running Model")
-sample = saltelli.sample(problem, 50, calc_second_order=False)
+sample = saltelli.sample(problem, 100, calc_second_order=False)
 Y = np.empty([sample.shape[0]])
+
+inputFile = open("sample.txt", "w")
+for samp in sample:
+    inputFile.write(str(samp) + "\n")
+inputFile.close()
 
 # evaluate the model for eah point in the input sample
 for i in range(len(Y)):
